@@ -1,0 +1,381 @@
+import os
+import json
+import requests
+import google.generativeai as genai
+
+def call_llm(prompt: str, system_instruction: str = None, response_mime_type: str = None, provider: str = "gemini", model: str = None, api_key: str = None) -> str:
+    # 1. Support mock calls for local sandboxed runs or offline validation
+    if os.getenv("MOCK_LLM") == "true":
+        print(f"[MOCK LLM] Calling {provider}/{model} with system_instruction: {system_instruction[:100] if system_instruction else 'None'}...")
+        
+        # Check if the process is about leave requests or vacancies
+        is_leave = False
+        is_sav = False
+        if prompt and any(k in prompt.lower() for k in ["congé", "leave", "absence", "vacance"]):
+            is_leave = True
+        elif prompt and any(k in prompt.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
+            is_sav = True
+            
+        if system_instruction and any(k in system_instruction.lower() for k in ["congé", "leave", "absence", "vacance"]):
+            is_leave = True
+        elif system_instruction and any(k in system_instruction.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
+            is_sav = True
+
+        if system_instruction and "concepteur de processus" in system_instruction.lower():
+            if is_leave:
+                return json.dumps({
+                    "id": "leave_request",
+                    "title": "Demande de Congés Annuels",
+                    "version": "1.0.0",
+                    "status": "draft",
+                    "purpose": "Permettre aux collaborateurs de soumettre et faire valider leurs demandes de congés.",
+                    "trigger": {"description": "L'employé soumet une demande sur le portail RH au moins 2 semaines à l'avance."},
+                    "scope": {"included": ["Vérification des soldes", "Validation managériale", "Mise à jour du calendrier"], "excluded": ["Ajustement de la paie"]},
+                    "actors": ["employé", "manager", "rh"],
+                    "tools": ["portail RH", "Outlook Calendar"],
+                    "steps": [
+                        {
+                            "id": "step_001",
+                            "title": "Soumettre la demande",
+                            "actor": "employé",
+                            "instructions": ["Se connecter au portail RH.", "Sélectionner les dates et soumettre."],
+                            "output": "demande_soumise",
+                            "transitions": "step_002"
+                        },
+                        {
+                            "id": "step_002",
+                            "title": "Vérifier le solde",
+                            "actor": "rh",
+                            "instructions": ["Vérifier le solde automatique sur le portail."],
+                            "output": "solde_valide",
+                            "transitions": {
+                                "suffisant": "step_003",
+                                "insuffisant": "step_004"
+                            }
+                        }
+                    ],
+                    "checklist": ["Demande déposée à temps", "Solde vérifié", "Approbation manager obtenue"],
+                    "risks": [
+                        {"description": "Absence simultanée de rôles clés", "control": "Vérification des calendriers d'équipe avant approbation"}
+                    ]
+                }, ensure_ascii=False)
+            elif is_sav:
+                return json.dumps({
+                    "id": "sav_replacement",
+                    "title": "Gestion du SAV & Remplacement Matériel",
+                    "version": "1.0.0",
+                    "status": "draft",
+                    "purpose": "Traiter et valider les pannes matérielles pour l'envoi de remplacements sous garantie.",
+                    "trigger": {"description": "Déclaration d'un incident matériel par le client sur le portail de support."},
+                    "scope": {"included": ["Diagnostic à distance", "Gestion logistique du retour RMA", "Expédition du remplacement"], "excluded": ["Réparations payantes hors garantie"]},
+                    "actors": ["agent_support_n1", "technicien_n2", "operateur_entrepot", "client"],
+                    "tools": ["CRM Support", "Portail Expéditions", "Système Inventaire"],
+                    "steps": [
+                        {
+                            "id": "step_001",
+                            "title": "Vérifier la garantie dans le CRM",
+                            "actor": "agent_support_n1",
+                            "instructions": ["Rechercher le numéro de série dans le CRM.", "Valider le statut de la garantie."],
+                            "output": "statut_garantie",
+                            "transitions": {
+                                "valide": "step_002",
+                                "invalide": "step_003"
+                            }
+                        },
+                        {
+                            "id": "step_002",
+                            "title": "Effectuer le diagnostic technique",
+                            "actor": "technicien_n2",
+                            "instructions": ["Prendre contact avec le client.", "Exécuter les scripts de test à distance."],
+                            "output": "verdict_diagnostic",
+                            "transitions": {
+                                "panne_materielle": "step_004",
+                                "resolu_logiciel": "step_005"
+                            }
+                        }
+                    ],
+                    "checklist": ["Garantie CRM validée", "Diagnostic complété", "Bon RMA généré", "Inspection physique validée", "Remplacement livré"],
+                    "risks": [
+                        {"description": "Expédition sans réception du retour défectueux", "control": "Bloquer l'envoi dans le système d'inventaire tant que le RMA n'est pas scanné."}
+                    ]
+                }, ensure_ascii=False)
+            else:
+                return json.dumps({
+                    "id": "order_processing",
+                    "title": "Traitement des Commandes Clients",
+                    "version": "1.0.0",
+                    "status": "draft",
+                    "purpose": "Transformer la réception d'une commande client en expédition vérifiée.",
+                    "trigger": {"description": "Arrivée d'une commande client sur le canal e-commerce."},
+                    "scope": {"included": ["Vérification stock", "Préparation colis"], "excluded": ["Livraison"]},
+                    "actors": ["stock_manager", "admin"],
+                    "tools": ["système d'inventaire"],
+                    "steps": [
+                        {
+                            "id": "step_001",
+                            "title": "Réceptionner la commande",
+                            "actor": "admin",
+                            "instructions": ["Ouvrir l'administration e-commerce.", "Télécharger le bon de commande."],
+                            "output": "commande_enregistree",
+                            "transitions": "step_002"
+                        },
+                        {
+                            "id": "step_002",
+                            "title": "Vérifier la disponibilité",
+                            "actor": "stock_manager",
+                            "instructions": ["Comparer le stock réel avec la quantité commandée."],
+                            "output": "disponibilite_produits",
+                            "transitions": {
+                                "available": "step_003",
+                                "partial": "step_004",
+                                "unavailable": "step_005"
+                            }
+                        }
+                    ],
+                    "checklist": ["Commande validée", "Stock disponible", "Colis étiqueté"],
+                    "risks": [
+                        {"description": "Rupture de stock non détectée", "control": "Vérification systématique avant validation"}
+                    ]
+                }, ensure_ascii=False)
+        elif system_instruction and "analyste de processus" in system_instruction.lower():
+            if is_leave:
+                return json.dumps({
+                    "questions": [
+                        {"question": "Sous quel délai le collaborateur doit-il poser sa demande ?", "category": "trigger", "blocking": True},
+                        {"question": "Qui valide en cas d'absence du manager direct ?", "category": "actor", "blocking": True},
+                        {"question": "Comment le solde est-il vérifié (automatique ou manuel) ?", "category": "tools", "blocking": True}
+                    ]
+                }, ensure_ascii=False)
+            elif is_sav:
+                return json.dumps({
+                    "questions": [
+                        {"question": "Quel est le délai maximum pour que le client renvoie son produit après réception du RMA ?", "category": "scope", "blocking": True},
+                        {"question": "Quelle action mener si le produit de remplacement est en rupture de stock ?", "category": "exception", "blocking": True},
+                        {"question": "Quel document de contrôle est exigé pour valider l'inspection du matériel à l'entrepôt ?", "category": "evidence_critical", "blocking": True}
+                    ]
+                }, ensure_ascii=False)
+            else:
+                return json.dumps({
+                    "questions": [
+                        {"question": "Par quel canal la commande arrive-t-elle ?", "category": "trigger", "blocking": True},
+                        {"question": "Qui vérifie la commande ?", "category": "actor", "blocking": True},
+                        {"question": "Que faire si le stock est insuffisant ?", "category": "exception", "blocking": True}
+                    ]
+                }, ensure_ascii=False)
+        elif system_instruction and "propose des réponses logiques" in system_instruction.lower():
+            if is_leave:
+                return json.dumps({
+                    "Sous quel délai le collaborateur doit-il poser sa demande ?": "Au moins 2 semaines avant la date de début souhaitée.",
+                    "Qui valide en cas d'absence du manager direct ?": "Le n+2 (directeur de département) ou le service RH.",
+                    "Comment le solde est-il vérifié (automatique ou manuel) ?": "Automatiquement via le portail RH."
+                }, ensure_ascii=False)
+            elif is_sav:
+                return json.dumps({
+                    "Quel est le délai maximum pour que le client renvoie son produit après réception du RMA ?": "Le client dispose de 30 jours calendaires.",
+                    "Quelle action mener si le produit de remplacement est en rupture de stock ?": "Proposer un modèle équivalent ou supérieur, ou émettre un remboursement.",
+                    "Quel document de contrôle est exigé pour valider l'inspection du matériel à l'entrepôt ?": "Une fiche d'inspection technique signée et sauvegardée dans le CRM."
+                }, ensure_ascii=False)
+            else:
+                return json.dumps({
+                    "Par quel canal la commande arrive-t-elle ?": "Via l'e-mail du service client ou l'interface d'administration.",
+                    "Qui vérifie la commande ?": "Le conseiller support client (support_agent).",
+                    "Que faire si le stock est insuffisant ?": "Mettre la commande en attente et envoyer un e-mail automatique d'explication au client."
+                }, ensure_ascii=False)
+        elif system_instruction and "business analyst expert" in system_instruction.lower():
+            if is_leave:
+                return json.dumps({
+                    "title": "Demande de Congés Annuels",
+                    "purpose": "Gérer et valider les demandes d'absence.",
+                    "trigger": "Soumission d'une demande de congés.",
+                    "expected_result": "Demande validée ou refusée.",
+                    "scope": {"included": ["Validation manager", "Mise à jour planning"], "excluded": ["Ajustement de la paie"]},
+                    "actors": ["employé", "manager", "rh"],
+                    "tools": ["portail RH"],
+                    "known_steps": ["Soumettre la demande", "Vérifier le solde"],
+                    "decisions": ["Le manager valide-t-il la demande ?"],
+                    "exceptions": ["Refus du manager", "Solde insuffisant"]
+                }, ensure_ascii=False)
+            elif is_sav:
+                return json.dumps({
+                    "title": "Gestion du SAV & Remplacement Matériel",
+                    "purpose": "Traiter les pannes matérielles sous garantie, de la déclaration à l'expédition du produit de remplacement.",
+                    "trigger": "Déclaration d'incident matériel par le client.",
+                    "expected_result": "Client dépanné ou produit de remplacement livré, et ticket clôturé.",
+                    "scope": {"included": ["Diagnostic à distance", "Gestion logistique du retour", "Expédition du remplacement"], "excluded": ["Réparation en atelier physique hors garantie"]},
+                    "actors": ["agent_support_n1", "technicien_n2", "operateur_entrepot", "client"],
+                    "tools": ["CRM Support", "Portail Expéditions", "Système Inventaire"],
+                    "known_steps": ["Vérifier garantie", "Effectuer diagnostic", "Générer bon RMA", "Inspecter retour", "Expédier remplacement", "Clôturer ticket"],
+                    "decisions": ["Garantie valide ?", "Résolu par logiciel ?", "Retour conforme ?"],
+                    "exceptions": ["Garantie invalide", "Mauvaise utilisation détectée", "Rupture de stock remplacement"]
+                }, ensure_ascii=False)
+            else:
+                return json.dumps({
+                    "title": "Traitement des Commandes Clients",
+                    "purpose": "Expédier les commandes rapidement.",
+                    "trigger": "Arrivée d'une commande.",
+                    "expected_result": "Commande préparée et expédiée.",
+                    "scope": {"included": ["Vérification stock", "Préparation"], "excluded": ["Livraison"]},
+                    "actors": ["admin", "stock_manager"],
+                    "tools": ["système d'inventaire"],
+                    "known_steps": ["Réceptionner la commande", "Vérifier la disponibilité"],
+                    "decisions": ["Le produit est-il en stock ?"],
+                    "exceptions": ["Stock insuffisant"]
+                }, ensure_ascii=False)
+        elif system_instruction and "fusionne le brief" in system_instruction.lower():
+            if is_leave:
+                return json.dumps({
+                    "title": "Demande de Congés Annuels (Clarifié)",
+                    "purpose": "Gérer et valider les demandes d'absence.",
+                    "trigger": "Soumission d'une demande sur le portail RH avec 2 semaines de préavis.",
+                    "expected_result": "Demande validée ou refusée.",
+                    "scope": {"included": ["Validation manager", "Mise à jour planning"], "excluded": ["Ajustement de la paie"]},
+                    "actors": ["employé", "manager", "rh"],
+                    "tools": ["portail RH"],
+                    "known_steps": ["Soumettre la demande", "Vérifier le solde"],
+                    "decisions": ["Le manager valide-t-il la demande ?"],
+                    "exceptions": ["Refus du manager", "Solde insuffisant"]
+                }, ensure_ascii=False)
+            elif is_sav:
+                return json.dumps({
+                    "title": "Gestion du SAV & Remplacement Matériel (Clarifié)",
+                    "purpose": "Traiter les pannes matérielles sous garantie.",
+                    "trigger": "Déclaration d'incident avec un délai RMA de 30 jours calendaires.",
+                    "expected_result": "Remplacement conforme expédié, et ticket clôturé.",
+                    "scope": {"included": ["Diagnostic à distance", "Gestion logistique du retour", "Expédition du remplacement"], "excluded": ["Réparation en atelier physique hors garantie"]},
+                    "actors": ["agent_support_n1", "technicien_n2", "operateur_entrepot", "client"],
+                    "tools": ["CRM Support", "Portail Expéditions", "Système Inventaire"],
+                    "known_steps": ["Vérifier garantie", "Effectuer diagnostic", "Générer bon RMA", "Inspecter retour", "Expédier remplacement", "Clôturer ticket"],
+                    "decisions": ["Garantie valide ?", "Résolu par logiciel ?", "Retour conforme ?"],
+                    "exceptions": ["Garantie invalide", "Mauvaise utilisation détectée", "Rupture de stock remplacement"]
+                }, ensure_ascii=False)
+            else:
+                return json.dumps({
+                    "title": "Traitement des Commandes Clients (Clarifié)",
+                    "purpose": "Expédier les commandes rapidement.",
+                    "trigger": "Arrivée d'une commande via Shopify.",
+                    "expected_result": "Commande préparée et expédiée.",
+                    "scope": {"included": ["Vérification stock", "Préparation"], "excluded": ["Livraison"]},
+                    "actors": ["admin", "stock_manager"],
+                    "tools": ["système d'inventaire", "Shopify"],
+                    "known_steps": ["Réceptionner la commande", "Vérifier la disponibilité"],
+                    "decisions": ["Le produit est-il en stock ?"],
+                    "exceptions": ["Stock insuffisant"]
+                }, ensure_ascii=False)
+        else:
+            return json.dumps({"status": "ok"}, ensure_ascii=False)
+
+    provider = (provider or "gemini").lower()
+    
+    # 2. Branching on Providers
+    if provider == "ollama":
+        model_name = model or "llama3"
+        url = os.getenv("OLLAMA_HOST", "http://localhost:11434").rstrip("/") + "/api/chat"
+        messages = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
+        messages.append({"role": "user", "content": prompt})
+        
+        payload = {
+            "model": model_name,
+            "messages": messages,
+            "stream": False,
+            "options": {"temperature": 0.0}
+        }
+        if response_mime_type == "application/json":
+            payload["format"] = "json"
+            
+        print(f"[Ollama] Calling model '{model_name}' at {url}...")
+        try:
+            r = requests.post(url, json=payload, timeout=60)
+            r.raise_for_status()
+            return r.json()["message"]["content"]
+        except Exception as e:
+            print(f"[Ollama Error] {e}")
+            raise e
+            
+    elif provider == "deepseek":
+        model_name = model or "deepseek-chat"
+        url = "https://api.deepseek.com/v1/chat/completions"
+        
+        # Resolve key
+        ds_key = api_key or os.getenv("DEEPSEEK_API_KEY")
+        if not ds_key:
+            # Check env files
+            for p in [".env.local", "../.env.local", "../../.env.local"]:
+                if os.path.exists(p):
+                    with open(p) as f:
+                        for line in f:
+                            if "=" in line and not line.startswith("#"):
+                                k, v = line.split("=", 1)
+                                if k.strip() == "DEEPSEEK_API_KEY":
+                                    ds_key = v.strip().strip('"').strip("'")
+                                    break
+                if ds_key:
+                    break
+        if not ds_key:
+            raise ValueError("DeepSeek API key (DEEPSEEK_API_KEY) not found.")
+            
+        messages = []
+        if system_instruction:
+            messages.append({"role": "system", "content": system_instruction})
+        messages.append({"role": "user", "content": prompt})
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {ds_key}"
+        }
+        payload = {
+            "model": model_name,
+            "messages": messages,
+            "temperature": 0.0
+        }
+        if response_mime_type == "application/json":
+            payload["response_format"] = {"type": "json_object"}
+            
+        print(f"[DeepSeek] Calling model '{model_name}'...")
+        try:
+            r = requests.post(url, headers=headers, json=payload, timeout=60)
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"]
+        except Exception as e:
+            print(f"[DeepSeek Error] {e}")
+            raise e
+            
+    else:  # default: gemini
+        model_name = model or "gemini-1.5-flash"
+        
+        # Resolve Gemini key
+        gemini_key = api_key or os.getenv("GEMINI_API_KEY")
+        if not gemini_key:
+            for p in [".env.local", "../.env.local", "../../.env.local"]:
+                if os.path.exists(p):
+                    with open(p) as f:
+                        for line in f:
+                            if "=" in line and not line.startswith("#"):
+                                k, v = line.split("=", 1)
+                                if k.strip() == "GEMINI_API_KEY":
+                                    gemini_key = v.strip().strip('"').strip("'")
+                                    break
+                if gemini_key:
+                    break
+                    
+        if not gemini_key:
+            print("[Gemini] API key not found. Automatically falling back to MOCK mode.")
+            os.environ["MOCK_LLM"] = "true"
+            return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            
+        genai.configure(api_key=gemini_key)
+        
+        print(f"[Gemini] Calling model '{model_name}'...")
+        model_obj = genai.GenerativeModel(
+            model_name=model_name,
+            system_instruction=system_instruction
+        )
+        
+        config = {}
+        if response_mime_type:
+            config["response_mime_type"] = response_mime_type
+            
+        response = model_obj.generate_content(prompt, generation_config=config)
+        return response.text
+

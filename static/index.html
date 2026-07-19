@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nümtema Pack Factory - Concepteur de Procédures</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Mermaid.js for flowcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    </script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- CSS -->
+    <style>
+        :root {
+            --bg-color: #edebe7;
+            --glass-bg: #ffffff;
+            --glass-border: #e1dfda;
+            --accent: #486a5a;
+            --accent-gradient: linear-gradient(135deg, #486a5a 0%, #3d5e4f 100%);
+            --accent-glow: rgba(72, 106, 90, 0.08);
+            --text-primary: #1e332a;
+            --text-secondary: #5e6b64;
+            --success: #3d8b5c;
+            --success-bg: #e2f2e9;
+            --warning: #d97706;
+            --warning-bg: #fef3c7;
+            --error: #b91c1c;
+            --error-bg: #fee2e2;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* App Layout structure */
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 1.5rem;
+            bottom: 1.5rem;
+            left: 1.5rem;
+            width: 80px;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 2rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-weight: 800;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease-in-out;
+            outline: none;
+        }
+
+        .nav-item:hover {
+            background: #f5f4f0;
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent);
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(72, 106, 90, 0.25);
+        }
+
+        .sidebar-footer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f5f4f0;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--accent);
+        }
+
+        .main-content {
+            margin-left: 120px;
+            flex-grow: 1;
+            padding: 2.25rem 3rem 2.25rem 1.5rem;
+            max-width: 1400px;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .header-titles h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.25rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-titles p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .header-search-bar {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-search-bar .lucide {
+            position: absolute;
+            left: 14px;
+            color: var(--text-secondary);
+            width: 18px;
+            height: 18px;
+        }
+
+        .header-search-bar input {
+            width: 320px;
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            outline: none;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease-in-out;
+        }
+
+        .header-search-bar input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 4px 20px rgba(72, 106, 90, 0.08);
+        }
+
+        .view-frame {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view-frame.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.25rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), 0 1px 3px rgba(0, 0, 0, 0.02);
+            margin-bottom: 2rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        textarea, input[type="text"], select {
+            width: 100%;
+            background: #faf9f6;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        textarea:focus, input[type="text"]:focus, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            background: #ffffff;
+        }
+
+        .btn {
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(72, 106, 90, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(72, 106, 90, 0.35);
+            filter: brightness(1.05);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            color: var(--text-primary);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #f5f4f0;
+            border-color: #c8c6c0;
+            box-shadow: none;
+            transform: translateY(-2px);
+        }
+
+        .lucide {
+            width: 1.15em;
+            height: 1.15em;
+            stroke-width: 2px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        
+        button .lucide {
+            margin-bottom: 1px;
+        }
+        
+        .spin {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        @media (min-width: 900px) {
+            .layout-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .question-card {
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1.5rem;
+        }
+
+        .question-label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge-blocking {
+            background: rgba(185, 28, 28, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(185, 28, 28, 0.2);
+            font-size: 0.75rem;
+            padding: 0.2rem 0.5rem;
+            border-radius: 6px;
+            font-weight: 500;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            outline: none;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        pre {
+            background: #faf9f6;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            overflow-x: auto;
+            color: var(--text-primary);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+        }
+
+        .markdown-body {
+            font-family: inherit;
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        .markdown-body ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .gate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .gate-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .gate-item:hover {
+            background: #f5f4f0;
+            border-color: #c8c6c0;
+        }
+
+        .loader-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo">
+                <i data-lucide="cog" class="spin" style="width: 28px; height: 28px; color: var(--accent); animation-duration: 8s; stroke-width: 1.5px;"></i>
+            </div>
+            <nav class="sidebar-nav">
+                <button id="nav-create" class="nav-item active" onclick="switchView('creation')" title="Créer un Pack">
+                    <i data-lucide="plus-circle"></i>
+                </button>
+                <button id="nav-history" class="nav-item" onclick="switchView('history')" title="Bibliothèque & Historique">
+                    <i data-lucide="library"></i>
+                </button>
+                <button id="nav-settings" class="nav-item" onclick="switchView('settings')" title="Configuration LLM">
+                    <i data-lucide="settings"></i>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-avatar" title="Nümtema Team">NT</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-titles">
+                    <h1>NÜMTEMA PACK FACTORY</h1>
+                    <p>Module Vertical B — Créateur de Procédures Opérationnelles</p>
+                </div>
+                <div class="header-search-bar" id="header-search-wrapper" style="display: none;">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="top-search" placeholder="Rechercher un pack..." oninput="syncAndSearch(this.value)">
+                </div>
+            </header>
+
+            <!-- View: Creation -->
+            <div id="view-creation" class="view-frame active">
+                <!-- Initial Input -->
+                <section id="input-section" class="card">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="file-text" style="color: var(--accent);"></i> Décrivez le processus à modéliser</h2>
+                    <textarea id="raw-demand" rows="5" placeholder="Exemple : Quand une commande arrive, le stock manager vérifie la disponibilité. Si le produit est en stock, il prépare l'envoi. Si le stock est insuffisant, il propose une alternative..."></textarea>
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                        <button id="btn-submit-init" class="btn" onclick="submitDemand()"><i data-lucide="play-circle"></i> Analyser et Lancer la mission</button>
+                    </div>
+                </section>
+
+                <!-- Loader -->
+                <div id="loader-section" class="loader-container card" style="padding: 3rem 2rem; display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--accent);"></i></div>
+                    <h3 id="loader-title" style="font-family: 'Outfit'; font-size: 1.25rem; color: var(--text-primary); margin-bottom: 1.5rem; text-align: center;">Traitement en cours...</h3>
+                    <div id="loader-steps" style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 0.8rem; margin: 0 auto 1.5rem auto;"></div>
+                    <p id="loader-text" style="color: var(--text-secondary); font-size: 0.85rem; font-style: italic; text-align: center; margin: 0;">Initialisation...</p>
+                </div>
+
+                <!-- Clarification Interview -->
+                <section id="clarification-section" class="card" style="display: none;">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; color: var(--warning); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="alert-circle"></i> Clarification requise</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Le moteur a besoin de précisions sur les points suivants pour générer une procédure structurée sans angles morts.
+                    </p>
+                    <div id="questions-container"></div>
+                    <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <button id="btn-autofill" class="btn btn-secondary" onclick="autofillWithAI()" style="border-color: var(--accent); color: var(--text-primary); background: rgba(72, 106, 90, 0.08); gap: 0.5rem;"><i data-lucide="wand-2"></i> Auto-remplir avec l'IA</button>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary" onclick="forceGenerate()"><i data-lucide="arrow-right-circle"></i> Passer outre</button>
+                            <button class="btn" onclick="submitAnswers()"><i data-lucide="check-circle"></i> Valider les réponses</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Main Results Grid -->
+                <div id="results-grid" class="layout-grid" style="display: none; margin-top: 2rem;">
+                    <!-- Left Panel: Artifacts tabs -->
+                    <div class="card" style="grid-column: 1 / -1; display: flex; flex-direction: column;">
+                        <div class="tabs" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="tab-btn active" onclick="switchTab('tab-procedure')">Procédure</button>
+                                <button class="tab-btn" onclick="switchTab('tab-checklist')">Checklist</button>
+                                <button class="tab-btn" onclick="switchTab('tab-diagram')">Diagramme</button>
+                                <button class="tab-btn" onclick="switchTab('tab-report')">Contrôle Qualité</button>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" onclick="downloadZip()" style="padding: 0.5rem 1rem; font-size: 0.85rem; height: auto; border-color: var(--success); color: var(--text-primary); background: rgba(61, 139, 92, 0.1); gap: 0.4rem;"><i data-lucide="archive"></i> Télécharger tout (.ZIP)</button>
+                                <button class="btn btn-secondary" onclick="resetToHome()" style="padding: 0.5rem 1rem; font-size: 0.85rem; height: auto; border-color: rgba(0,0,0,0.15); gap: 0.4rem;"><i data-lucide="plus-circle"></i> Nouveau Pack</button>
+                            </div>
+                        </div>
+
+                        <!-- Tab 1: Detailed Procedure -->
+                        <div id="tab-procedure" class="tab-content active">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h3 style="font-family: 'Outfit';">Procédure détaillée</h3>
+                                <button class="btn btn-secondary" onclick="downloadFile('procedure')"><i data-lucide="download"></i> Télécharger .MD</button>
+                            </div>
+                            <div id="procedure-content" class="markdown-body" style="background: #faf9f6; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); white-space: pre-wrap; font-family: monospace;"></div>
+                        </div>
+
+                        <!-- Tab 2: Operational Checklist -->
+                        <div id="tab-checklist" class="tab-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h3 style="font-family: 'Outfit';">Checklist terrain</h3>
+                                <button class="btn btn-secondary" onclick="downloadFile('checklist')"><i data-lucide="download"></i> Télécharger .MD</button>
+                            </div>
+                            <div id="checklist-content" class="markdown-body" style="background: #faf9f6; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border); white-space: pre-wrap;"></div>
+                        </div>
+
+                        <!-- Tab 3: Process Diagram -->
+                        <div id="tab-diagram" class="tab-content">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                                <h3 style="font-family: 'Outfit';">Diagramme du processus</h3>
+                                <button class="btn btn-secondary" onclick="downloadFile('diagram')"><i data-lucide="download"></i> Télécharger Mermaid</button>
+                            </div>
+                            <div style="background: #faf9f6; padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: center; overflow-x: auto;">
+                                <div id="mermaid-render" class="mermaid"></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab 4: Quality Gate / Verification -->
+                        <div id="tab-report" class="tab-content">
+                            <h3 style="font-family: 'Outfit'; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="shield-check" style="color: var(--success);"></i> Vérification structurelle</h3>
+                            <div style="display: flex; gap: 2rem; align-items: center; margin-bottom: 2rem; background: #faf9f6; padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                <div>
+                                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-primary);" id="score-val">0%</div>
+                                    <div style="font-size: 0.85rem; color: var(--text-secondary);">Score de complétude</div>
+                                </div>
+                                <div style="flex-grow: 1;">
+                                    <div style="font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem;">
+                                        Verdict : <span id="verdict-val" style="padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.9rem;"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom: 1rem;">Qualité des Gates opérationnelles</h4>
+                            <div class="gate-list" id="verification-gates-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: History -->
+            <div id="view-history" class="view-frame">
+                <!-- Bibliothèque / Historique -->
+                <section id="history-section" class="card" style="padding: 2.25rem;">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="library" style="color: var(--accent);"></i> Bibliothèque des Packs</h2>
+                    <div id="history-container" style="display: grid; grid-template-columns: 1fr; gap: 1rem; max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
+                        <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Chargement de l'historique...</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View: Settings -->
+            <div id="view-settings" class="view-frame">
+                <!-- LLM Settings -->
+                <section class="card" style="padding: 2.25rem;">
+                    <h2 style="font-family: 'Outfit'; font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="settings" style="color: var(--accent);"></i> Configurations LLM & Modèles</h2>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Fournisseur d'IA</label>
+                            <select id="llm-provider" onchange="onProviderChange()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none; font-family: inherit; font-size: 1rem;">
+                                <option value="gemini">Google Gemini (Défaut Cloud)</option>
+                                <option value="ollama" selected>Ollama (Local / Offline)</option>
+                                <option value="deepseek">DeepSeek (Cloud API)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Modèle d'IA</label>
+                            <div id="model-select-wrapper">
+                                <input type="text" id="llm-model" placeholder="ex: gemini-1.5-flash ou llama3" oninput="saveSettings()">
+                            </div>
+                        </div>
+                        <div id="api-key-container" style="display: none;">
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Clé API personnalisée (optionnelle)</label>
+                            <input type="text" id="llm-api-key" placeholder="Saisir la clé API..." oninput="saveSettings()">
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- JS -->
+    <script>
+        let currentSessionId = "";
+        let currentData = null;
+        let currentSteps = [];
+        let loaderInterval = null;
+        let loaderStepIndex = 0;
+
+        function showLoader(titleText, defaultSubtext, type = "init") {
+            document.getElementById('input-section').style.display = 'none';
+            if (document.getElementById('history-section')) document.getElementById('history-section').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('loader-section').style.display = 'flex';
+            
+            // Build dynamic steps list based on type
+            const stepsContainer = document.getElementById('loader-steps');
+            stepsContainer.innerHTML = "";
+            
+            if (type === "init") {
+                currentSteps = [
+                    { id: 'step-parsing', text: 'Analyse de la demande brute', icon: 'file-search', subtext: 'Nettoyage syntaxique...' },
+                    { id: 'step-ai', text: 'Consultation du modèle d\'IA', icon: 'cpu', subtext: 'Requête auprès du fournisseur sélectionné...' },
+                    { id: 'step-extracting', text: 'Extraction des rôles et étapes', icon: 'share-2', subtext: 'Structuration du brief de processus...' },
+                    { id: 'step-gates', text: 'Détection des informations manquantes', icon: 'shield-alert', subtext: 'Analyse des 11 règles qualité...' }
+                ];
+            } else {
+                currentSteps = [
+                    { id: 'step-validation', text: 'Validation de vos réponses', icon: 'check-square', subtext: 'Vérification de la clarté...' },
+                    { id: 'step-merging', text: 'Consolidation & Fusion du brief', icon: 'git-merge', subtext: 'Intégration des précisions...' },
+                    { id: 'step-generating', text: 'Génération de la procédure', icon: 'file-text', subtext: 'Rédaction du document structuré...' },
+                    { id: 'step-checking', text: 'Audit de complétude final', icon: 'bar-chart-2', subtext: 'Calcul du score et validation...' }
+                ];
+            }
+            
+            currentSteps.forEach(s => {
+                const item = document.createElement('div');
+                item.id = s.id;
+                item.className = "loader-step-item";
+                item.style.display = "flex";
+                item.style.alignItems = "center";
+                item.style.justifyContent = "space-between";
+                item.style.fontSize = "0.9rem";
+                item.style.color = "var(--text-secondary)";
+                item.style.background = "rgba(255,255,255,0.01)";
+                item.style.border = "1px solid var(--glass-border)";
+                item.style.padding = "0.6rem 1rem";
+                item.style.borderRadius = "12px";
+                item.style.transition = "all 0.3s ease";
+                item.innerHTML = `
+                    <span style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i data-lucide="${s.icon}" style="width: 16px; height: 16px; opacity: 0.7;"></i>
+                        <span>${s.text}</span>
+                    </span>
+                    <span class="step-status" style="display: flex; align-items: center;"><i data-lucide="circle" style="width: 16px; height: 16px; opacity: 0.4;"></i></span>
+                `;
+                stepsContainer.appendChild(item);
+            });
+            
+            lucide.createIcons();
+            startLoaderAnimation(titleText, defaultSubtext);
+        }
+
+        function startLoaderAnimation(titleText, defaultSubtext) {
+            clearInterval(loaderInterval);
+            document.getElementById('loader-title').innerText = titleText;
+            document.getElementById('loader-text').innerText = defaultSubtext;
+            
+            loaderStepIndex = 0;
+            
+            // Set first step active
+            activateLoaderStep(currentSteps[0]);
+
+            loaderInterval = setInterval(() => {
+                if (loaderStepIndex < currentSteps.length) {
+                    completeLoaderStep(currentSteps[loaderStepIndex]);
+                    loaderStepIndex++;
+                    
+                    if (loaderStepIndex < currentSteps.length) {
+                        activateLoaderStep(currentSteps[loaderStepIndex]);
+                    } else {
+                        clearInterval(loaderInterval);
+                    }
+                }
+            }, 1000); // Progress every 1s
+        }
+
+        function activateLoaderStep(step) {
+            const el = document.getElementById(step.id);
+            if (el) {
+                el.style.borderColor = 'var(--accent)';
+                el.style.background = 'rgba(108, 92, 231, 0.05)';
+                el.style.color = 'var(--text-primary)';
+                el.querySelector('.step-status').innerHTML = `<i data-lucide="loader-2" class="spin" style="width: 16px; height: 16px; color: var(--accent);"></i>`;
+                document.getElementById('loader-text').innerText = step.subtext;
+                lucide.createIcons();
+            }
+        }
+
+        function completeLoaderStep(step) {
+            const el = document.getElementById(step.id);
+            if (el) {
+                el.style.borderColor = 'var(--success)';
+                el.style.background = 'rgba(16, 185, 129, 0.05)';
+                el.style.color = 'var(--text-primary)';
+                el.querySelector('.step-status').innerHTML = `<i data-lucide="check-circle-2" style="width: 16px; height: 16px; color: var(--success);"></i>`;
+                lucide.createIcons();
+            }
+        }
+
+        function completeAllLoaderSteps() {
+            clearInterval(loaderInterval);
+            currentSteps.forEach(s => {
+                completeLoaderStep(s);
+            });
+            document.getElementById('loader-text').innerText = 'Prêt !';
+        }
+
+        function hideLoader() {
+            document.getElementById('loader-section').style.display = 'none';
+        }
+
+        async function submitDemand() {
+            const rawDemand = document.getElementById('raw-demand').value;
+            if (!rawDemand.trim()) return alert("Veuillez saisir votre demande.");
+
+            const provider = document.getElementById('llm-provider').value;
+            const model = document.getElementById('llm-model').value;
+            const apiKey = document.getElementById('llm-api-key').value;
+
+            showLoader("Nümtema Pack Factory", "Initialisation de la mission...", "init");
+
+            try {
+                const response = await fetch('/api/procedure/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        raw_demand: rawDemand,
+                        provider: provider,
+                        model: model || null,
+                        api_key: apiKey || null
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || (errData.body ? JSON.stringify(errData.body) : "Erreur de validation ou de serveur."));
+                }
+
+                const data = await response.json();
+                completeAllLoaderSteps();
+                await new Promise(r => setTimeout(r, 600));
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Une erreur s'est produite : " + err.message);
+                document.getElementById('input-section').style.display = 'block';
+                if (document.getElementById('history-section')) document.getElementById('history-section').style.display = 'block';
+                hideLoader();
+            }
+        }
+
+        function handleFlowResult(data) {
+            hideLoader();
+            currentSessionId = data.session_id;
+            currentData = data;
+
+            // Auto-refresh library
+            fetchHistory();
+
+            if (data.status === "waiting_clarification") {
+                renderClarificationForm(data.missing_info);
+            } else {
+                renderResults(data);
+            }
+        }
+
+        function renderClarificationForm(questions) {
+            document.getElementById('input-section').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'block';
+
+            const container = document.getElementById('questions-container');
+            container.innerHTML = "";
+
+            questions.forEach((q, idx) => {
+                const block = document.createElement('div');
+                block.className = "question-card";
+                block.innerHTML = `
+                    <div class="question-label">
+                        <span>Q${idx + 1}. ${q.question}</span>
+                        ${q.blocking ? '<span class="badge-blocking">Bloquant</span>' : ''}
+                    </div>
+                    <input type="text" class="clarify-input" data-question="${q.question}" placeholder="Votre réponse...">
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        async function autofillWithAI() {
+            const btn = document.getElementById('btn-autofill');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Recherche des suggestions...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/suggest-answers`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Impossible de récupérer les suggestions.");
+                }
+
+                const data = await response.json();
+                const suggestions = data.suggestions || {};
+
+                // Map suggestions to the form inputs
+                const inputs = document.querySelectorAll('.clarify-input');
+                inputs.forEach(input => {
+                    const qText = input.dataset.question;
+                    if (suggestions[qText]) {
+                        input.value = suggestions[qText];
+                        // Highlight input visually to show it was populated
+                        input.style.borderColor = 'var(--success)';
+                        setTimeout(() => {
+                            input.style.borderColor = 'var(--glass-border)';
+                        }, 2000);
+                    }
+                });
+            } catch (err) {
+                alert("Erreur lors de la suggestion : " + err.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function submitAnswers() {
+            const inputs = document.querySelectorAll('.clarify-input');
+            const answers = {};
+            inputs.forEach(input => {
+                answers[input.dataset.question] = input.value;
+            });
+
+            showLoader("Nümtema Pack Factory", "Consolidation des réponses...", "answer");
+
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers: answers })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Erreur de validation des réponses.");
+                }
+
+                const data = await response.json();
+                completeAllLoaderSteps();
+                await new Promise(r => setTimeout(r, 600));
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur lors de la validation des réponses : " + err.message);
+                hideLoader();
+            }
+        }
+
+        async function forceGenerate() {
+            showLoader("Nümtema Pack Factory", "Génération forcée...", "answer");
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/force-generate`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json();
+                    throw new Error(errData.detail || "Erreur lors de la génération forcée.");
+                }
+
+                const data = await response.json();
+                completeAllLoaderSteps();
+                await new Promise(r => setTimeout(r, 600));
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur lors de la génération forcée : " + err.message);
+                hideLoader();
+            }
+        }
+
+        function renderResults(data) {
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'grid';
+
+            const artifacts = data.artifacts;
+            document.getElementById('procedure-content').innerText = artifacts.detailed_procedure;
+            document.getElementById('checklist-content').innerText = artifacts.checklist;
+
+            // Render Mermaid flowchart
+            const diagramDiv = document.getElementById('mermaid-render');
+            diagramDiv.removeAttribute('data-processed');
+            diagramDiv.innerHTML = "Génération du schéma...";
+            
+            const uniqueId = 'mermaid-svg-' + Date.now();
+            mermaid.render(uniqueId, artifacts.diagram).then(result => {
+                diagramDiv.innerHTML = result.svg;
+            }).catch(err => {
+                console.error("Mermaid async rendering failed:", err);
+                diagramDiv.innerHTML = `<pre style="color: var(--text-secondary); text-align: left; background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 8px;">${artifacts.diagram}</pre>`;
+            });
+
+            // Quality Report
+            const verif = data.verification_result || { verdict: "passed", completeness_score: 100, blockers: [], warnings: [] };
+            document.getElementById('score-val').innerText = verif.completeness_score + "%";
+            
+            const verdictSpan = document.getElementById('verdict-val');
+            verdictSpan.innerText = verif.verdict === 'passed' ? 'CONFORME' : 'RÉVISION REQUISE';
+            verdictSpan.style.backgroundColor = verif.verdict === 'passed' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)';
+            verdictSpan.style.color = verif.verdict === 'passed' ? 'var(--success)' : 'var(--error)';
+
+            // Render checks list
+            const gatesContainer = document.getElementById('verification-gates-container');
+            gatesContainer.innerHTML = "";
+
+            // Custom checks list to render matching quality gates
+            const gates = [
+                { id: "start_trigger", label: "Déclencheur (Start Trigger) défini", isBlocker: true },
+                { id: "end_state", label: "État final ou destination de sortie défini", isBlocker: true },
+                { id: "step_actor", label: "Responsable (actor) pour chaque étape", isBlocker: true },
+                { id: "step_output", label: "Livrable de sortie pour chaque étape", isBlocker: false },
+                { id: "evidence_critical", label: "Justificatifs (evidences) pour étapes critiques", isBlocker: true },
+                { id: "no_orphan", label: "Absence d'étape orpheline", isBlocker: true },
+                { id: "risk_control", label: "Association risque / contrôle", isBlocker: false }
+            ];
+
+            gates.forEach(g => {
+                let status = "passed";
+                let detail = "Conforme";
+
+                if (g.id === "start_trigger" && verif.blockers.some(b => b.includes("déclenchement"))) {
+                    status = "failed";
+                    detail = "Déclencheur absent";
+                } else if (g.id === "end_state" && verif.blockers.some(b => b.includes("aucune étape"))) {
+                    status = "failed";
+                    detail = "Étapes absentes";
+                } else if (g.id === "step_actor" && verif.blockers.some(b => b.includes("responsable"))) {
+                    status = "failed";
+                    detail = "Acteur manquant détecté";
+                } else if (g.id === "step_output" && verif.warnings.some(w => w.includes("sortie"))) {
+                    status = "warning";
+                    detail = "Sorties non explicitées";
+                } else if (g.id === "evidence_critical" && verif.blockers.some(b => b.includes("contrôle"))) {
+                    status = "failed";
+                    detail = "Preuve de contrôle absente";
+                } else if (g.id === "risk_control" && verif.warnings.some(w => w.includes("risque"))) {
+                    status = "warning";
+                    detail = "Risques sans contrôle défini";
+                }
+
+                let iconName = "check-circle-2";
+                let iconColor = "var(--success)";
+                if (status === "failed") {
+                    iconName = "x-circle";
+                    iconColor = "var(--error)";
+                } else if (status === "warning") {
+                    iconName = "alert-triangle";
+                    iconColor = "var(--warning)";
+                }
+
+                const item = document.createElement('div');
+                item.className = "gate-item";
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight:600;">${g.label}</div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary);">${detail}</div>
+                    </div>
+                    <span style="display: flex; align-items: center;"><i data-lucide="${iconName}" style="color: ${iconColor}; width: 20px; height: 20px;"></i></span>
+                `;
+                gatesContainer.appendChild(item);
+            });
+            lucide.createIcons();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            
+            // Highlight button
+            event.target.classList.add('active');
+        }
+
+        function downloadFile(type) {
+            const artifacts = currentData.artifacts;
+            let content = "";
+            let filename = "";
+
+            if (type === "procedure") {
+                content = artifacts.detailed_procedure;
+                filename = `${currentSessionId}_procedure.md`;
+            } else if (type === "checklist") {
+                content = artifacts.checklist;
+                filename = `${currentSessionId}_checklist.md`;
+            } else if (type === "diagram") {
+                content = artifacts.diagram;
+                filename = `${currentSessionId}_diagram.mermaid`;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function downloadZip() {
+            if (!currentSessionId) {
+                alert("Aucune session active ou pack chargé à télécharger.");
+                return;
+            }
+            window.location.href = `/api/procedure/${currentSessionId}/zip`;
+        }
+
+        function toggleSettings() {
+            const body = document.getElementById('llm-settings-body');
+            const icon = document.getElementById('settings-toggle-icon');
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                icon.style.transform = 'rotate(180deg)';
+            } else {
+                body.style.display = 'none';
+                icon.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        let ollamaModels = ["llama3:latest", "mistral:latest", "codegemma:latest", "phi3:latest"];
+
+        async function fetchOllamaModels() {
+            try {
+                const response = await fetch('/api/ollama/models');
+                const data = await response.json();
+                ollamaModels = data.models;
+                console.log(`[Ollama] Models detected:`, ollamaModels);
+                onProviderChange();
+            } catch (err) {
+                console.error("Error fetching Ollama models:", err);
+            }
+        }
+
+        async function fetchHistory(q = null) {
+            const query = q !== null ? q : (document.getElementById('top-search')?.value || "");
+            try {
+                const url = query ? `/api/history?q=${encodeURIComponent(query)}` : '/api/history';
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                const container = document.getElementById('history-container');
+                container.innerHTML = "";
+                
+                if (data.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Aucun pack enregistré dans la bibliothèque.</p>`;
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const row = document.createElement('div');
+                    row.style.background = "#ffffff";
+                    row.style.border = "1px solid var(--glass-border)";
+                    row.style.borderRadius = "12px";
+                    row.style.padding = "1.1rem";
+                    row.style.display = "flex";
+                    row.style.justifyContent = "space-between";
+                    row.style.alignItems = "center";
+                    row.style.gap = "1rem";
+                    row.style.animation = "fadeIn 0.3s ease";
+                    row.style.transition = "all 0.2s ease-in-out";
+                    
+                    row.onmouseenter = () => {
+                        row.style.background = "#f5f4f0";
+                        row.style.borderColor = "var(--accent)";
+                        row.style.transform = "translateX(4px)";
+                    };
+                    row.onmouseleave = () => {
+                        row.style.background = "#ffffff";
+                        row.style.borderColor = "var(--glass-border)";
+                        row.style.transform = "translateX(0)";
+                    };
+                    
+                    const isCompleted = item.status === "completed";
+                    const statusBadge = isCompleted 
+                        ? `<span style="background: var(--success-bg, #e2f2e9); color: var(--success); font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: bold; border: 1px solid rgba(61, 139, 92, 0.2);">Prêt</span>`
+                        : `<span style="background: var(--warning-bg, #fef3c7); color: var(--warning); font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 6px; font-weight: bold; border: 1px solid rgba(217, 119, 6, 0.2);">En attente</span>`;
+                        
+                    row.innerHTML = `
+                        <div style="flex: 1; min-width: 0; text-align: left;">
+                            <div style="font-weight: 600; font-family: 'Outfit'; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="display: flex; align-items: center; gap: 0.4rem;"><i data-lucide="package" style="width: 16px; height: 16px; color: var(--accent);"></i> ${item.title}</span> ${statusBadge}
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.25rem;">
+                                ${item.purpose || item.raw_demand}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                                Modèle : ${item.provider} (${item.model || 'défaut'}) • ${new Date(item.created_at).toLocaleString()}
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadSession('${item.session_id}')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto; gap: 0.3rem;"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Charger</button>
+                    `;
+                    container.appendChild(row);
+                });
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Error fetching history:", err);
+            }
+        }
+
+        async function loadSession(sessionId) {
+            switchView('creation');
+            showLoader("Chargement du pack depuis la base de données...");
+            try {
+                const response = await fetch(`/api/history/${sessionId}`);
+                const data = await response.json();
+                
+                // Hide input to view output
+                document.getElementById('input-section').style.display = 'none';
+                
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur lors du chargement du pack.");
+                hideLoader();
+            }
+        }
+
+        function resetToHome() {
+            switchView('creation');
+            document.getElementById('input-section').style.display = 'block';
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('raw-demand').value = "";
+            fetchHistory();
+        }
+
+        function switchView(viewId) {
+            const views = document.querySelectorAll('.view-frame');
+            views.forEach(v => v.classList.remove('active'));
+
+            const activeView = document.getElementById(`view-${viewId}`);
+            if (activeView) activeView.classList.add('active');
+
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            const activeBtn = document.getElementById(`nav-${viewId === 'creation' ? 'create' : viewId}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const searchWrapper = document.getElementById('header-search-wrapper');
+            if (searchWrapper) {
+                searchWrapper.style.display = (viewId === 'history') ? 'block' : 'none';
+            }
+            lucide.createIcons();
+        }
+
+        function syncAndSearch(val) {
+            fetchHistory(val);
+        }
+
+        function saveSettings() {
+            const provider = document.getElementById('llm-provider').value;
+            const model = document.getElementById('llm-model').value;
+            const apiKey = document.getElementById('llm-api-key').value;
+            
+            localStorage.setItem('llm_provider', provider);
+            localStorage.setItem('llm_model', model);
+            localStorage.setItem('llm_api_key', apiKey);
+            console.log("[Settings] Configurations saved to localStorage:", {provider, model});
+        }
+
+        function loadSettings() {
+            const provider = localStorage.getItem('llm_provider') || 'ollama';
+            const model = localStorage.getItem('llm_model') || 'gpt-oss:20b-cloud';
+            const apiKey = localStorage.getItem('llm_api_key') || '';
+
+            document.getElementById('llm-provider').value = provider;
+            
+            onProviderChange(model);
+            
+            // Re-fetch in case value was modified
+            const modelEl = document.getElementById('llm-model');
+            if (modelEl) modelEl.value = model;
+            
+            const apiEl = document.getElementById('llm-api-key');
+            if (apiEl) apiEl.value = apiKey;
+        }
+
+        function onProviderChange(selectedModel = null) {
+            const provider = document.getElementById('llm-provider').value;
+            const selectWrapper = document.getElementById('model-select-wrapper');
+            const keyContainer = document.getElementById('api-key-container');
+            
+            // Ensure gpt-oss default models are always available
+            if (!ollamaModels.includes("gpt-oss:20b-cloud")) {
+                ollamaModels.unshift("gpt-oss:20b-cloud");
+            }
+            if (!ollamaModels.includes("gpt-oss:120b-cloud")) {
+                ollamaModels.unshift("gpt-oss:120b-cloud");
+            }
+
+            const activeModel = selectedModel || localStorage.getItem('llm_model') || 'gpt-oss:20b-cloud';
+
+            if (provider === 'gemini') {
+                const gemModel = selectedModel || 'gemini-1.5-flash';
+                selectWrapper.innerHTML = `<input type="text" id="llm-model" value="${gemModel}" placeholder="ex: gemini-1.5-flash" oninput="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none;">`;
+                keyContainer.style.display = 'none';
+            } else if (provider === 'ollama') {
+                let selectHtml = `<select id="llm-model" onchange="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none; font-family: inherit; font-size: 1rem;">`;
+                ollamaModels.forEach(m => {
+                    const isSel = (m === activeModel) ? 'selected' : '';
+                    selectHtml += `<option value="${m}" ${isSel}>${m}</option>`;
+                });
+                selectHtml += `</select>`;
+                selectWrapper.innerHTML = selectHtml;
+                keyContainer.style.display = 'none';
+            } else if (provider === 'deepseek') {
+                const dsModel = selectedModel || 'deepseek-chat';
+                selectWrapper.innerHTML = `<input type="text" id="llm-model" value="${dsModel}" placeholder="ex: deepseek-chat" oninput="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none;">`;
+                keyContainer.style.display = 'block';
+            }
+            
+            // Save state immediately
+            localStorage.setItem('llm_provider', provider);
+            localStorage.setItem('llm_model', activeModel);
+            lucide.createIcons();
+        }
+
+        window.addEventListener('load', async () => {
+            await fetchOllamaModels();
+            loadSettings();
+            fetchHistory();
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>
