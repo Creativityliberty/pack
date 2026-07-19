@@ -8,18 +8,25 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
     if os.getenv("MOCK_LLM") == "true":
         print(f"[MOCK LLM] Calling {provider}/{model} with system_instruction: {system_instruction[:100] if system_instruction else 'None'}...")
         
-        # Check if the process is about leave requests or vacancies
         is_leave = False
         is_sav = False
-        if prompt and any(k in prompt.lower() for k in ["congé", "leave", "absence", "vacance"]):
-            is_leave = True
-        elif prompt and any(k in prompt.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
-            is_sav = True
-            
-        if system_instruction and any(k in system_instruction.lower() for k in ["congé", "leave", "absence", "vacance"]):
-            is_leave = True
-        elif system_instruction and any(k in system_instruction.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
-            is_sav = True
+        is_software_spec = False
+        
+        # Check if the prompt is about software specs, design, or crushing
+        search_prompt_lower = (prompt or "").lower()
+        if any(k in search_prompt_lower for k in ["concassage", "concasseur", "crushing", "specification", "architecture", "yaml", "pipeline"]):
+            is_software_spec = True
+
+        if not is_software_spec:
+            if prompt and any(k in prompt.lower() for k in ["congé", "leave", "absence", "vacance"]):
+                is_leave = True
+            elif prompt and any(k in prompt.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
+                is_sav = True
+                
+            if system_instruction and any(k in system_instruction.lower() for k in ["congé", "leave", "absence", "vacance"]):
+                is_leave = True
+            elif system_instruction and any(k in system_instruction.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
+                is_sav = True
 
         # Extract dynamic topic keyword for custom processes in mock mode
         topic = "processus"
