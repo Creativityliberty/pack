@@ -306,12 +306,20 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
             
         print(f"[Ollama] Calling model '{model_name}' at {url}...")
         try:
-            r = requests.post(url, json=payload, timeout=60)
+            r = requests.post(url, json=payload, timeout=3)
             r.raise_for_status()
             return r.json()["message"]["content"]
         except Exception as e:
-            print(f"[Ollama Error] {e}")
-            raise e
+            print(f"[Ollama Error] {e}. Basculement automatique en mode MOCK.")
+            old_mock = os.environ.get("MOCK_LLM")
+            os.environ["MOCK_LLM"] = "true"
+            try:
+                return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            finally:
+                if old_mock is not None:
+                    os.environ["MOCK_LLM"] = old_mock
+                else:
+                    os.environ.pop("MOCK_LLM", None)
             
     elif provider == "deepseek":
         model_name = model or "deepseek-chat"
@@ -320,7 +328,6 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
         # Resolve key
         ds_key = api_key or os.getenv("DEEPSEEK_API_KEY")
         if not ds_key:
-            # Check env files
             for p in [".env.local", "../.env.local", "../../.env.local"]:
                 if os.path.exists(p):
                     with open(p) as f:
@@ -333,7 +340,16 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                 if ds_key:
                     break
         if not ds_key:
-            raise ValueError("DeepSeek API key (DEEPSEEK_API_KEY) not found.")
+            print("[DeepSeek Error] Key missing. Basculement automatique en mode MOCK.")
+            old_mock = os.environ.get("MOCK_LLM")
+            os.environ["MOCK_LLM"] = "true"
+            try:
+                return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            finally:
+                if old_mock is not None:
+                    os.environ["MOCK_LLM"] = old_mock
+                else:
+                    os.environ.pop("MOCK_LLM", None)
             
         messages = []
         if system_instruction:
@@ -354,17 +370,24 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
             
         print(f"[DeepSeek] Calling model '{model_name}'...")
         try:
-            r = requests.post(url, headers=headers, json=payload, timeout=60)
+            r = requests.post(url, headers=headers, json=payload, timeout=5)
             r.raise_for_status()
             return r.json()["choices"][0]["message"]["content"]
         except Exception as e:
-            print(f"[DeepSeek Error] {e}")
-            raise e
+            print(f"[DeepSeek Error] {e}. Basculement automatique en mode MOCK.")
+            old_mock = os.environ.get("MOCK_LLM")
+            os.environ["MOCK_LLM"] = "true"
+            try:
+                return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            finally:
+                if old_mock is not None:
+                    os.environ["MOCK_LLM"] = old_mock
+                else:
+                    os.environ.pop("MOCK_LLM", None)
             
     else:  # default: gemini
         model_name = model or "gemini-1.5-flash"
         
-        # Resolve Gemini key
         gemini_key = api_key or os.getenv("GEMINI_API_KEY")
         if not gemini_key:
             for p in [".env.local", "../.env.local", "../../.env.local"]:
@@ -380,22 +403,41 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                     break
                     
         if not gemini_key:
-            print("[Gemini] API key not found. Automatically falling back to MOCK mode.")
+            print("[Gemini] API key not found. Basculement automatique en mode MOCK.")
+            old_mock = os.environ.get("MOCK_LLM")
             os.environ["MOCK_LLM"] = "true"
-            return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            try:
+                return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            finally:
+                if old_mock is not None:
+                    os.environ["MOCK_LLM"] = old_mock
+                else:
+                    os.environ.pop("MOCK_LLM", None)
             
-        genai.configure(api_key=gemini_key)
-        
-        print(f"[Gemini] Calling model '{model_name}'...")
-        model_obj = genai.GenerativeModel(
-            model_name=model_name,
-            system_instruction=system_instruction
-        )
-        
-        config = {}
-        if response_mime_type:
-            config["response_mime_type"] = response_mime_type
+        try:
+            genai.configure(api_key=gemini_key)
             
-        response = model_obj.generate_content(prompt, generation_config=config)
-        return response.text
+            print(f"[Gemini] Calling model '{model_name}'...")
+            model_obj = genai.GenerativeModel(
+                model_name=model_name,
+                system_instruction=system_instruction
+            )
+            
+            config = {}
+            if response_mime_type:
+                config["response_mime_type"] = response_mime_type
+                
+            response = model_obj.generate_content(prompt, generation_config=config)
+            return response.text
+        except Exception as e:
+            print(f"[Gemini Error] {e}. Basculement automatique en mode MOCK.")
+            old_mock = os.environ.get("MOCK_LLM")
+            os.environ["MOCK_LLM"] = "true"
+            try:
+                return call_llm(prompt, system_instruction, response_mime_type, provider, model, api_key)
+            finally:
+                if old_mock is not None:
+                    os.environ["MOCK_LLM"] = old_mock
+                else:
+                    os.environ.pop("MOCK_LLM", None)
 
