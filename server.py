@@ -472,6 +472,17 @@ def get_ollama_models():
     fallback_models = ["llama3:latest", "mistral:latest", "codegemma:latest", "phi3:latest"]
     return {"models": fallback_models, "online": False}
 
+@app.get("/api/paa")
+def search_people_also_ask(q: str):
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Requête de recherche vide.")
+    from utils_scraping import get_people_also_ask_mined
+    try:
+        questions = get_people_also_ask_mined(q)
+        return {"query": q, "questions": questions}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/")
 def read_index():
     index_path = "static/index.html"

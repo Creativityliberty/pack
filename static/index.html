@@ -450,8 +450,14 @@
                 <i data-lucide="cog" class="spin" style="width: 28px; height: 28px; color: var(--accent); animation-duration: 8s; stroke-width: 1.5px;"></i>
             </div>
             <nav class="sidebar-nav">
-                <button id="nav-create" class="nav-item active" onclick="switchView('creation')" title="Créer un Pack">
-                    <i data-lucide="plus-circle"></i>
+                <button id="nav-dashboard" class="nav-item active" onclick="switchView('dashboard')" title="Tableau de Bord / Accueil">
+                    <i data-lucide="home"></i>
+                </button>
+                <button id="nav-create" class="nav-item" onclick="switchView('creation')" title="Module B - Pack Factory">
+                    <i data-lucide="package"></i>
+                </button>
+                <button id="nav-paa" class="nav-item" onclick="switchView('paa')" title="Module C - People Also Ask">
+                    <i data-lucide="help-circle"></i>
                 </button>
                 <button id="nav-history" class="nav-item" onclick="switchView('history')" title="Bibliothèque & Historique">
                     <i data-lucide="library"></i>
@@ -470,8 +476,8 @@
             <!-- Header -->
             <header class="main-header">
                 <div class="header-titles">
-                    <h1>NÜMTEMA PACK FACTORY</h1>
-                    <p>Module Vertical B — Créateur de Procédures Opérationnelles</p>
+                    <h1 id="page-title">NÜMTEMA AGENTIC HUB</h1>
+                    <p id="page-subtitle">Tableau de Bord & Accueil</p>
                 </div>
                 <div class="header-search-bar" id="header-search-wrapper" style="display: none;">
                     <i data-lucide="search"></i>
@@ -479,8 +485,68 @@
                 </div>
             </header>
 
+            <!-- View: Dashboard (Default) -->
+            <div id="view-dashboard" class="view-frame active">
+                <div class="card" style="padding: 2.5rem; text-align: center; margin-bottom: 2rem;">
+                    <h2 style="font-family: 'Outfit'; font-size: 2rem; margin-bottom: 0.5rem; color: var(--accent);">Bienvenue sur le Hub Nümtema</h2>
+                    <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 2.5rem auto;">
+                        La plateforme décisionnelle intégrée qui associe l'exploration de l'intention sémantique à l'ingénierie des procédures opérationnelles.
+                    </p>
+                    
+                    <div class="layout-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; text-align: left;">
+                        <!-- Module B Card -->
+                        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.15);">
+                            <div>
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(72, 106, 90, 0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                    <i data-lucide="package" style="color: var(--accent); width: 24px; height: 24px;"></i>
+                                </div>
+                                <h3 style="font-family: 'Outfit'; font-size: 1.3rem; margin-bottom: 0.75rem;">Module B — Pack Factory</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                                    Générez des procédures détaillées, des checklists terrain, des logigrammes Mermaid et réalisez un audit de conformité automatique de vos processus.
+                                </p>
+                            </div>
+                            <button class="btn" style="width: 100%;" onclick="switchView('creation')">Ouvrir Pack Factory</button>
+                        </div>
+                        
+                        <!-- Module C Card -->
+                        <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.15);">
+                            <div>
+                                <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(72, 106, 90, 0.08); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                    <i data-lucide="help-circle" style="color: var(--accent); width: 24px; height: 24px;"></i>
+                                </div>
+                                <h3 style="font-family: 'Outfit'; font-size: 1.3rem; margin-bottom: 0.75rem;">Module C — People Also Ask</h3>
+                                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                                    Analysez et cartographiez les questions connexes réelles des internautes sur Google. Bâtissez des cocons sémantiques complets sans frais d'API.
+                                </p>
+                            </div>
+                            <button class="btn btn-secondary" style="width: 100%; border-color: var(--accent); color: var(--accent); background: none;" onclick="switchView('paa')">Lancer la recherche sémantique</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Synergy Card -->
+                <div class="card" style="padding: 2.25rem;">
+                    <h3 style="font-family: 'Outfit'; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;"><i data-lucide="git-branch" style="color: var(--accent);"></i> Synergie d'Exécution Inter-Modules</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                        La synergie relie directement l'intention utilisateur trouvée sur Google à la production de documentation opérationnelle interne :
+                    </p>
+                    <div style="background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 16px; padding: 1.5rem; display: flex; align-items: center; justify-content: center; overflow-x: auto;">
+                        <div class="mermaid" id="synergy-mermaid-diagram" style="width: 100%; text-align: center;">
+                            graph LR
+                                C(Recherche PAA - Module C) -->|Extraire les questions| D(Cocon Sémantique / Sujets)
+                                D -->|Créer Procédure| B(Conception Brief - Module B)
+                                B -->|Génération de Pack| P(Procédure & Checklist terrain)
+                                classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;
+                                classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;
+                                class C,B,P default;
+                                class D root;
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- View: Creation -->
-            <div id="view-creation" class="view-frame active">
+            <div id="view-creation" class="view-frame">
                 <!-- Initial Input -->
                 <section id="input-section" class="card">
                     <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="file-text" style="color: var(--accent);"></i> Décrivez le processus à modéliser</h2>
@@ -577,6 +643,53 @@
 
                             <h4 style="margin-bottom: 1rem;">Qualité des Gates opérationnelles</h4>
                             <div class="gate-list" id="verification-gates-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: PAA -->
+            <div id="view-paa" class="view-frame">
+                <!-- Input Panel -->
+                <section class="card" style="padding: 2.25rem;">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="help-circle" style="color: var(--accent);"></i> Recherche Sémantique & Extraction PAA</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+                        Entrez un sujet ou un mot-clé pour explorer en temps réel les questions les plus posées par les internautes sur Google. Bâtissez un cocon sémantique et transformez ces questions en procédures.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="paa-keyword" placeholder="Exemple : debuter le violon, gerer un depart de salarie, traiter les commandes clients..." style="flex-grow: 1; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem 1rem; font-size: 1rem; outline: none; background: #faf9f6; font-family: inherit;">
+                        <button class="btn" onclick="runPAAMining()" style="gap: 0.5rem;"><i data-lucide="search"></i> Cartographier les Questions</button>
+                    </div>
+                </section>
+
+                <!-- PAA Loader -->
+                <div id="paa-loader" class="loader-container card" style="padding: 4rem 2rem; display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--accent);"></i></div>
+                    <h3 style="font-family: 'Outfit'; font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.5rem; text-align: center;">Extraction sémantique en cours...</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; font-style: italic; text-align: center; margin: 0; max-width: 400px; line-height: 1.5;">Extraction et structuration récursive de Google Autocomplete...</p>
+                </div>
+
+                <!-- Results Panel -->
+                <div id="paa-results" class="card" style="display: none; padding: 2.25rem; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <h3 id="paa-result-title" style="font-family: 'Outfit'; font-size: 1.25rem; margin: 0;"></h3>
+                        <div class="tabs" style="display: flex; gap: 0.5rem; border: none; margin: 0; padding: 0;">
+                            <button class="tab-btn active" id="paa-tab-btn-map" onclick="switchPAATab('paa-tab-map')">Schéma Sémantique</button>
+                            <button class="tab-btn" id="paa-tab-btn-list" onclick="switchPAATab('paa-tab-list')">Liste des Questions</button>
+                        </div>
+                    </div>
+
+                    <!-- PAA Tab 1: Mermaid Mindmap -->
+                    <div id="paa-tab-map" class="tab-content active">
+                        <div style="background: #faf9f6; padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: center; overflow-x: auto; margin-bottom: 1.5rem;">
+                            <div id="paa-mermaid-render" style="width: 100%; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <!-- PAA Tab 2: Question List with Actions -->
+                    <div id="paa-tab-list" class="tab-content">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;" id="paa-questions-list-container">
+                            <!-- Populated dynamically -->
                         </div>
                     </div>
                 </div>
@@ -1178,14 +1291,181 @@
             const navItems = document.querySelectorAll('.nav-item');
             navItems.forEach(item => item.classList.remove('active'));
 
-            const activeBtn = document.getElementById(`nav-${viewId === 'creation' ? 'create' : viewId}`);
+            // Map creation/create nav id
+            const navBtnId = (viewId === 'creation') ? 'nav-create' : `nav-${viewId}`;
+            const activeBtn = document.getElementById(navBtnId);
             if (activeBtn) activeBtn.classList.add('active');
+
+            // Dynamic titles
+            const titleEl = document.getElementById('page-title');
+            const subtitleEl = document.getElementById('page-subtitle');
+            if (titleEl && subtitleEl) {
+                if (viewId === 'dashboard') {
+                    titleEl.innerText = "NÜMTEMA AGENTIC HUB";
+                    subtitleEl.innerText = "Tableau de Bord & Accueil";
+                } else if (viewId === 'creation') {
+                    titleEl.innerText = "PACK FACTORY";
+                    subtitleEl.innerText = "Module Vertical B — Créateur de Procédures";
+                } else if (viewId === 'paa') {
+                    titleEl.innerText = "PEOPLE ALSO ASK";
+                    subtitleEl.innerText = "Module Vertical C — Recherche Sémantique";
+                } else if (viewId === 'history') {
+                    titleEl.innerText = "BIBLIOTHÈQUE";
+                    subtitleEl.innerText = "Historique des packages et briefs";
+                } else if (viewId === 'settings') {
+                    titleEl.innerText = "CONFIGURATION";
+                    subtitleEl.innerText = "Paramètres LLM & Fournisseurs d'IA";
+                }
+            }
 
             const searchWrapper = document.getElementById('header-search-wrapper');
             if (searchWrapper) {
                 searchWrapper.style.display = (viewId === 'history') ? 'block' : 'none';
             }
+            
+            // Re-render synergy diagram if switching to dashboard
+            if (viewId === 'dashboard') {
+                setTimeout(renderSynergyDiagram, 50);
+            }
+
             lucide.createIcons();
+        }
+
+        function renderSynergyDiagram() {
+            const synEl = document.getElementById('synergy-mermaid-diagram');
+            if (synEl && !synEl.querySelector('svg')) {
+                const code = `graph LR
+                    C(Recherche PAA - Module C) -->|Extraire les questions| D(Cocon Sémantique / Sujets)
+                    D -->|Créer Procédure| B(Conception Brief - Module B)
+                    B -->|Génération de Pack| P(Procédure & Checklist terrain)
+                    classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;
+                    classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;
+                    class C,B,P default;
+                    class D root;`;
+                const uniqueId = 'mermaid-synergy-' + Date.now();
+                mermaid.render(uniqueId, code).then(result => {
+                    synEl.innerHTML = result.svg;
+                }).catch(err => console.error("Error rendering synergy diagram:", err));
+            }
+        }
+
+        async function runPAAMining() {
+            const keyword = document.getElementById('paa-keyword').value.trim();
+            if (!keyword) {
+                alert("Veuillez saisir un mot-clé ou sujet.");
+                return;
+            }
+            
+            document.getElementById('paa-results').style.display = 'none';
+            document.getElementById('paa-loader').style.display = 'block';
+            
+            try {
+                const response = await fetch(`/api/paa?q=${encodeURIComponent(keyword)}`);
+                if (!response.ok) throw new Error("Erreur de récupération");
+                const data = await response.json();
+                
+                renderPAAResults(keyword, data.questions || []);
+                document.getElementById('paa-results').style.display = 'flex';
+            } catch (err) {
+                alert("Erreur lors de l'extraction PAA : " + err.message);
+            } finally {
+                document.getElementById('paa-loader').style.display = 'none';
+            }
+        }
+
+        function renderPAAResults(keyword, questions) {
+            document.getElementById('paa-result-title').innerText = `Résultats pour "${keyword}" : ${questions.length} questions extraites`;
+            
+            // Render Mermaid Graph
+            const diagramDiv = document.getElementById('paa-mermaid-render');
+            diagramDiv.innerHTML = "";
+            
+            if (questions.length === 0) {
+                diagramDiv.innerHTML = "<p style='color: var(--text-secondary); padding: 2rem;'>Aucune question trouvée pour ce sujet.</p>";
+            } else {
+                let mCode = "graph TD\n";
+                mCode += `    root["${keyword.replace(/"/g, "'")}"]\n`;
+                mCode += "    classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;\n";
+                mCode += "    classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;\n";
+                mCode += "    class root root;\n";
+                
+                questions.forEach((q, idx) => {
+                    const safeQ = q.replace(/"/g, "'");
+                    mCode += `    q_${idx}["${safeQ}"]\n`;
+                    mCode += `    root --> q_${idx}\n`;
+                });
+                
+                const uniqueId = 'mermaid-paa-' + Date.now();
+                mermaid.render(uniqueId, mCode).then(result => {
+                    diagramDiv.innerHTML = result.svg;
+                }).catch(err => {
+                    console.error("Error rendering PAA diagram:", err);
+                    diagramDiv.innerHTML = `<pre>${mCode}</pre>`;
+                });
+            }
+            
+            // Render List with Actions
+            const container = document.getElementById('paa-questions-list-container');
+            container.innerHTML = "";
+            
+            if (questions.length === 0) {
+                container.innerHTML = "<p style='color: var(--text-secondary); text-align: center; padding: 2rem;'>Aucune question trouvée.</p>";
+            } else {
+                questions.forEach((q, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'gate-item';
+                    row.style.display = 'flex';
+                    row.style.justifyContent = 'space-between';
+                    row.style.alignItems = 'center';
+                    row.style.padding = '1rem';
+                    row.style.background = '#ffffff';
+                    row.style.borderRadius = '12px';
+                    row.style.border = '1px solid var(--glass-border)';
+                    
+                    row.innerHTML = `
+                        <div style="font-weight: 500; color: var(--text-primary); padding-right: 1.5rem; text-align: left;">
+                            ${q}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem; height: auto; border: 1px solid var(--glass-border); background: none;" title="Copier la question">
+                                <i data-lucide="copy" style="width: 14px; height: 14px; color: var(--text-secondary);"></i>
+                            </button>
+                            <button class="btn" onclick="createProcedureFromPAA('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto; gap: 0.3rem;">
+                                <i data-lucide="plus-circle" style="width: 14px; height: 14px;"></i> Créer Procédure
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function createProcedureFromPAA(question) {
+            // Put in creation demand input
+            document.getElementById('raw-demand').value = question;
+            // Clear outputs in creation view to allow fresh start
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('input-section').style.display = 'block';
+            
+            // Switch to creation view
+            switchView('creation');
+        }
+
+        function switchPAATab(tabId) {
+            const contents = document.querySelectorAll('#paa-results .tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const buttons = document.querySelectorAll('#paa-results .tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tabId === 'paa-tab-map') {
+                document.getElementById('paa-tab-btn-map').classList.add('active');
+            } else {
+                document.getElementById('paa-tab-btn-list').classList.add('active');
+            }
         }
 
         function syncAndSearch(val) {
@@ -1264,6 +1544,7 @@
             await fetchOllamaModels();
             loadSettings();
             fetchHistory();
+            switchView('dashboard');
             lucide.createIcons();
         });
     </script>
