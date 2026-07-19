@@ -144,17 +144,34 @@ def init_procedure(req: InitRequest):
 @app.post("/api/procedure/{session_id}/answer")
 def answer_procedure(session_id: str, req: AnswerRequest):
     if session_id not in SESSIONS:
-        raise HTTPException(status_code=404, detail="Session non trouvée.")
+        try:
+            get_historical_session(session_id)
+        except Exception:
+            pass
+        if session_id not in SESSIONS:
+            raise HTTPException(status_code=404, detail="Session non trouvée.")
         
     shared = SESSIONS[session_id]
     
-    # Update brief with user answers
+    # Update brief and top-level shared with user answers
+    shared["clarification_answers"] = req.answers
     if shared.get("brief"):
         shared["brief"]["user_answers"] = req.answers
     shared["clarified"] = True
     
-    flow = create_procedure_flow()
-    flow.run(shared)
+    try:
+        flow = create_procedure_flow()
+        flow.run(shared)
+    except Exception as e:
+        print(f"[Flow Error in answer_procedure] {e}")
+        if not shared.get("procedure"):
+            from procedure_flow import GenerateProcedureNode, VerifyProcedureNode, ExportArtifactsNode
+            gen_node = GenerateProcedureNode()
+            gen_node._run(shared)
+            ver_node = VerifyProcedureNode()
+            ver_node._run(shared)
+            exp_node = ExportArtifactsNode()
+            exp_node._run(shared)
     
     has_blocking = any(q.get("blocking", False) for q in shared.get("missing_info", []))
     status = "waiting_clarification" if (has_blocking and not shared.get("clarified")) else "completed"
@@ -176,13 +193,29 @@ def answer_procedure(session_id: str, req: AnswerRequest):
 @app.post("/api/procedure/{session_id}/force-generate")
 def force_generate_procedure(session_id: str):
     if session_id not in SESSIONS:
-        raise HTTPException(status_code=404, detail="Session non trouvée.")
+        try:
+            get_historical_session(session_id)
+        except Exception:
+            pass
+        if session_id not in SESSIONS:
+            raise HTTPException(status_code=404, detail="Session non trouvée.")
         
     shared = SESSIONS[session_id]
     shared["clarified"] = True
     
-    flow = create_procedure_flow()
-    flow.run(shared)
+    try:
+        flow = create_procedure_flow()
+        flow.run(shared)
+    except Exception as e:
+        print(f"[Flow Error in force_generate] {e}")
+        if not shared.get("procedure"):
+            from procedure_flow import GenerateProcedureNode, VerifyProcedureNode, ExportArtifactsNode
+            gen_node = GenerateProcedureNode()
+            gen_node._run(shared)
+            ver_node = VerifyProcedureNode()
+            ver_node._run(shared)
+            exp_node = ExportArtifactsNode()
+            exp_node._run(shared)
     
     status = "completed"
     if shared.get("artifacts"):

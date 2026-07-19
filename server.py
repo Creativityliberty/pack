@@ -170,14 +170,33 @@ def init_procedure(req: InitRequest):
 @app.post("/api/procedure/{session_id}/answer")
 def submit_answers(session_id: str, req: AnswerRequest):
     if session_id not in SESSIONS:
-        raise HTTPException(status_code=404, detail="Session non trouvée.")
+        try:
+            get_historical_session(session_id)
+        except Exception:
+            pass
+        if session_id not in SESSIONS:
+            raise HTTPException(status_code=404, detail="Session non trouvée.")
         
     shared = SESSIONS[session_id]
     shared["clarification_answers"] = req.answers
+    if shared.get("brief"):
+        shared["brief"]["user_answers"] = req.answers
+    shared["clarified"] = True
     
     # Re-run flow
-    flow = create_procedure_flow()
-    flow.run(shared)
+    try:
+        flow = create_procedure_flow()
+        flow.run(shared)
+    except Exception as e:
+        print(f"[Flow Error in submit_answers] {e}")
+        if not shared.get("procedure"):
+            from procedure_flow import GenerateProcedureNode, VerifyProcedureNode, ExportArtifactsNode
+            gen_node = GenerateProcedureNode()
+            gen_node._run(shared)
+            ver_node = VerifyProcedureNode()
+            ver_node._run(shared)
+            exp_node = ExportArtifactsNode()
+            exp_node._run(shared)
     
     # Check status
     has_blocking = any(q.get("blocking", False) for q in shared.get("missing_info", []))

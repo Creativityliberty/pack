@@ -101,14 +101,16 @@ Chaque question doit avoir :
 
 class ClarifyNode(FactoryNode):
     def _run(self, shared):
-        if not shared.get("clarification_answers"):
-            return "wait_answers"
+        answers = shared.get("clarification_answers") or (shared.get("brief", {}) or {}).get("user_answers")
+        if not answers:
+            return "default"
         return super()._run(shared)
 
     def prep(self, shared):
+        answers = shared.get("clarification_answers") or (shared.get("brief", {}) or {}).get("user_answers") or {}
         return {
-            "brief": shared["brief"],
-            "answers": shared.get("clarification_answers", {})
+            "brief": shared.get("brief", {}),
+            "answers": answers
         }
         
     def exec(self, prep_res):
