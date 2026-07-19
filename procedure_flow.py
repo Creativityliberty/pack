@@ -344,8 +344,8 @@ class ExportArtifactsNode(Node):
 * **Déclenchement** : {proc.get('trigger', {}).get('description', 'Non spécifié')}
 
 ## 3. Rôles et Outils
-* **Acteurs** : {', '.join(proc.get('actors', []))}
-* **Outils** : {', '.join(proc.get('tools', []))}
+* **Acteurs** : {', '.join(proc.get('actors') or [])}
+* **Outils** : {', '.join(proc.get('tools') or [])}
 
 ## 4. Étapes Détaillées
 """
@@ -355,9 +355,9 @@ class ExportArtifactsNode(Node):
 * **Acteur responsable** : `{step.get('actor')}`
 * **Instructions** :
 """
-            for inst in step.get("instructions", []):
+            for inst in (step.get("instructions") or []):
                 detailed_procedure += f"  - {inst}\n"
-            detailed_procedure += f"* **Entrées** : {', '.join(step.get('inputs', []))}\n"
+            detailed_procedure += f"* **Entrées** : {', '.join(step.get('inputs') or [])}\n"
             detailed_procedure += f"* **Sortie** : `{step.get('output')}`\n"
             if step.get("tool"):
                 detailed_procedure += f"* **Outil** : {step.get('tool')}\n"
@@ -397,10 +397,10 @@ def create_procedure_flow():
     extract >> missing
     
     # Branchements conditionnels
-    missing - "need_clarification" >> clarify
     missing - "produce" >> generate
     
-    clarify >> missing
+    # Une fois le brief clarifié avec les réponses utilisateur, on produit directement la procédure
+    clarify >> generate
     
     generate >> verify
     

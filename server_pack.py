@@ -93,12 +93,15 @@ def db_save_pack(session_id: str, shared: Dict[str, Any], status: str):
 
 init_db()
 
-def save_artifacts(session_id: str, artifacts: Dict[str, str]):
+def save_artifacts(session_id: str, artifacts: Dict[str, Any]):
     os.makedirs("output", exist_ok=True)
     for filename, content in artifacts.items():
         filepath = os.path.join("output", f"{session_id}_{filename}")
         with open(filepath, "w", encoding="utf-8") as f:
-            f.write(content)
+            if isinstance(content, (dict, list)):
+                f.write(json.dumps(content, ensure_ascii=False, indent=2))
+            else:
+                f.write(str(content or ""))
 
 @app.post("/api/procedure/init")
 def init_procedure(req: InitRequest):
@@ -143,52 +146,47 @@ def init_procedure(req: InitRequest):
 
 @app.post("/api/procedure/{session_id}/answer")
 def answer_procedure(session_id: str, req: AnswerRequest):
-    if session_id not in SESSIONS:
-        try:
-            get_historical_session(session_id)
-        except Exception:
-            pass
-        if session_id not in SESSIONS:
-            raise HTTPException(status_code=404, detail="Session non trouvée.")
-        
-    shared = SESSIONS[session_id]
-    
-    # Update brief and top-level shared with user answers
-    shared["clarification_answers"] = req.answers
-    if shared.get("brief"):
-        shared["brief"]["user_answers"] = req.answers
-    shared["clarified"] = True
-    
     try:
+        if session_id not in SESSIONS:
+            try:
+                get_historical_session(session_id)
+            except Exception:
+                pass
+            if session_id not in SESSIONS:
+                raise HTTPException(status_code=404, detail="Session non trouvée.")
+            
+        shared = SESSIONS[session_id]
+        
+        # Update brief and top-level shared with user answers
+        shared["clarification_answers"] = req.answers
+        if shared.get("brief"):
+            shared["brief"]["user_answers"] = req.answers
+        shared["clarified"] = True
+        
         flow = create_procedure_flow()
         flow.run(shared)
-    except Exception as e:
-        print(f"[Flow Error in answer_procedure] {e}")
-        if not shared.get("procedure"):
-            from procedure_flow import GenerateProcedureNode, VerifyProcedureNode, ExportArtifactsNode
-            gen_node = GenerateProcedureNode()
-            gen_node._run(shared)
-            ver_node = VerifyProcedureNode()
-            ver_node._run(shared)
-            exp_node = ExportArtifactsNode()
-            exp_node._run(shared)
-    
-    has_blocking = any(q.get("blocking", False) for q in shared.get("missing_info", []))
-    status = "waiting_clarification" if (has_blocking and not shared.get("clarified")) else "completed"
-    
-    if status == "completed" and shared.get("artifacts"):
-        save_artifacts(session_id, shared["artifacts"])
         
-    db_save_pack(session_id, shared, status)
+        has_blocking = any(q.get("blocking", False) for q in shared.get("missing_info", []))
+        status = "waiting_clarification" if (has_blocking and not shared.get("clarified")) else "completed"
         
-    return {
-        "session_id": session_id,
-        "status": status,
-        "brief": shared["brief"],
-        "missing_info": shared["missing_info"],
-        "verification_result": shared["verification_result"],
-        "artifacts": shared["artifacts"]
-    }
+        if status == "completed" and shared.get("artifacts"):
+            save_artifacts(session_id, shared["artifacts"])
+            
+        db_save_pack(session_id, shared, status)
+            
+        return {
+            "session_id": session_id,
+            "status": status,
+            "brief": shared["brief"],
+            "missing_info": shared["missing_info"],
+            "verification_result": shared["verification_result"],
+            "artifacts": shared["artifacts"]
+        }
+    except Exception as exc:
+        import traceback
+        err_msg = f"[ERROR in answer_procedure] {exc}\n{traceback.format_exc()}"
+        print(err_msg)
+        raise HTTPException(status_code=500, detail=str(exc))
 
 @app.post("/api/procedure/{session_id}/force-generate")
 def force_generate_procedure(session_id: str):

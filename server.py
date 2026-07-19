@@ -325,18 +325,7 @@ def get_session(session_id: str):
     }
 
 def save_artifacts(session_id: str, artifacts: Dict[str, Any]):
-    # Write to local outputs folder for export/traceability
-    prefix = f"output/{session_id}"
     os.makedirs("output", exist_ok=True)
-    
-    with open(f"{prefix}_procedure.md", "w") as f:
-        f.write(artifacts.get("detailed_procedure", ""))
-        
-    with open(f"{prefix}_checklist.md", "w") as f:
-        f.write(artifacts.get("checklist", ""))
-        
-    with open(f"{prefix}_diagram.mermaid", "w") as f:
-        f.write(artifacts.get("diagram", ""))
         
     with open(f"{prefix}_verification.json", "w") as f:
         json.dump(artifacts.get("verification_report", {}), f, ensure_ascii=False, indent=2)
