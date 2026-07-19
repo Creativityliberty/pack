@@ -42,6 +42,18 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                 break
 
         if system_instruction and "concepteur de processus" in system_instruction.lower():
+            # Extract precisions from prompt if present
+            user_precisions = []
+            if "user_answers" in prompt or "Précision" in prompt or "Réponses" in prompt:
+                import re
+                matches = re.findall(r':\s*"([^"]+)"', prompt)
+                user_precisions = [m for m in matches if len(m) > 2 and not m.startswith("step_")]
+
+            base_instructions = [f"Ouvrir la fiche de {topic}.", f"Vérifier les données de la demande de {topic}."]
+            if user_precisions:
+                for p in user_precisions:
+                    base_instructions.append(f"Précision utilisateur appliquée : {p}")
+
             if is_leave:
                 return json.dumps({
                     "id": "leave_request",
@@ -58,7 +70,7 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                             "id": "step_001",
                             "title": "Soumettre la demande",
                             "actor": "employé",
-                            "instructions": ["Se connecter au portail RH.", "Sélectionner les dates et soumettre."],
+                            "instructions": base_instructions,
                             "output": "demande_soumise",
                             "transitions": "step_002"
                         },
@@ -95,7 +107,7 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                             "id": "step_001",
                             "title": "Vérifier la garantie dans le CRM",
                             "actor": "agent_support_n1",
-                            "instructions": ["Rechercher le numéro de série dans le CRM.", "Valider le statut de la garantie."],
+                            "instructions": base_instructions,
                             "output": "statut_garantie",
                             "transitions": {
                                 "valide": "step_002",
@@ -136,7 +148,7 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                             "id": "step_001",
                             "title": f"Initier le dossier de {topic}",
                             "actor": "gestionnaire_dossier",
-                            "instructions": [f"Ouvrir la fiche de {topic}.", f"Vérifier les données de la demande de {topic}."],
+                            "instructions": base_instructions,
                             "output": f"{topic}_initialise",
                             "transitions": "step_002"
                         },
@@ -242,7 +254,17 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                     "exceptions": [f"Rejet ou non-conformité de {topic}"]
                 }, ensure_ascii=False)
         elif system_instruction and "fusionne le brief" in system_instruction.lower():
+            user_details = []
+            if "Réponses apportées :" in prompt:
+                answers_part = prompt.split("Réponses apportées :")[-1]
+                import re
+                vals = re.findall(r':\s*"([^"]+)"', answers_part)
+                user_details = [v for v in vals if len(v) > 1]
+                
             if is_leave:
+                steps = ["Soumettre la demande", "Vérifier le solde"]
+                if user_details:
+                    steps.extend([f"Précision apportée : {ans}" for ans in user_details])
                 return json.dumps({
                     "title": "Demande de Congés Annuels (Clarifié)",
                     "purpose": "Gérer et valider les demandes d'absence.",
@@ -251,11 +273,14 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                     "scope": {"included": ["Validation manager", "Mise à jour planning"], "excluded": ["Ajustement de la paie"]},
                     "actors": ["employé", "manager", "rh"],
                     "tools": ["portail RH"],
-                    "known_steps": ["Soumettre la demande", "Vérifier le solde"],
+                    "known_steps": steps,
                     "decisions": ["Le manager valide-t-il la demande ?"],
                     "exceptions": ["Refus du manager", "Solde insuffisant"]
                 }, ensure_ascii=False)
             elif is_sav:
+                steps = ["Vérifier garantie", "Effectuer diagnostic", "Générer bon RMA"]
+                if user_details:
+                    steps.extend([f"Précision apportée : {ans}" for ans in user_details])
                 return json.dumps({
                     "title": "Gestion du SAV & Remplacement Matériel (Clarifié)",
                     "purpose": "Traiter les pannes matérielles sous garantie.",
@@ -264,20 +289,23 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                     "scope": {"included": ["Diagnostic à distance", "Gestion logistique du retour", "Expédition du remplacement"], "excluded": ["Réparation en atelier physique hors garantie"]},
                     "actors": ["agent_support_n1", "technicien_n2", "operateur_entrepot", "client"],
                     "tools": ["CRM Support", "Portail Expéditions", "Système Inventaire"],
-                    "known_steps": ["Vérifier garantie", "Effectuer diagnostic", "Générer bon RMA", "Inspecter retour", "Expédier remplacement", "Clôturer ticket"],
+                    "known_steps": steps,
                     "decisions": ["Garantie valide ?", "Résolu par logiciel ?", "Retour conforme ?"],
                     "exceptions": ["Garantie invalide", "Mauvaise utilisation détectée", "Rupture de stock remplacement"]
                 }, ensure_ascii=False)
             else:
+                steps = [f"Initier {topic}", f"Vérifier conformité {topic}"]
+                if user_details:
+                    steps.extend([f"Précision : {ans}" for ans in user_details])
                 return json.dumps({
-                    "title": f"Gestion de : {topic.capitalize()} (Clarifié)",
+                    "title": f"Gestion de : {topic.capitalize()} (Clarifié avec précisions)",
                     "purpose": f"Gérer efficacement la tâche de {topic}.",
                     "trigger": f"Détection du besoin de {topic} (processus validé).",
                     "expected_result": f"Processus de {topic} clôturé et validé.",
                     "scope": {"included": [f"Vérification de {topic}", f"Enregistrement de {topic}"], "excluded": ["Intervention technique externe"]},
                     "actors": ["gestionnaire", "superviseur"],
                     "tools": ["système d'information"],
-                    "known_steps": [f"Initier {topic}", f"Vérifier conformité {topic}"],
+                    "known_steps": steps,
                     "decisions": [f"{topic.capitalize()} est-il valide ?"],
                     "exceptions": [f"Rejet ou non-conformité de {topic}"]
                 }, ensure_ascii=False)

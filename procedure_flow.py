@@ -92,10 +92,15 @@ Chaque question doit avoir :
     def post(self, shared, prep_res, exec_res):
         shared["missing_info"] = exec_res.get("questions", [])
         
-        # S'il y a des questions bloquantes, on doit clarifier
+        # S'il y a des questions bloquantes et non encore clarifiées, on attend
         has_blocking = any(q.get("blocking", False) for q in shared["missing_info"])
         if has_blocking and not shared.get("clarified", False):
             return "need_clarification"
+            
+        # Si des réponses ont été apportées, exécuter d'abord la consolidation via ClarifyNode
+        if shared.get("clarification_answers"):
+            return "clarify"
+            
         return "produce"
 
 
@@ -145,7 +150,7 @@ Renvoie le brief consolidé mis à jour au format JSON complet avec les mêmes c
     def post(self, shared, prep_res, exec_res):
         shared["brief"] = exec_res
         shared["clarified"] = True
-        # Une fois clarifié, on retourne à l'analyse pour vérifier s'il manque encore quelque chose ou si on produit
+        shared.pop("clarification_answers", None)
         return "default"
 
 
@@ -397,6 +402,7 @@ def create_procedure_flow():
     extract >> missing
     
     # Branchements conditionnels
+    missing - "clarify" >> clarify
     missing - "produce" >> generate
     
     # Une fois le brief clarifié avec les réponses utilisateur, on produit directement la procédure
