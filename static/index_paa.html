@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nümtema People Also Ask - Recherche Sémantique</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Mermaid.js for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #edebe7;
+            --bg-card: #ffffff;
+            --text-primary: #1e332a;
+            --text-secondary: #5a7065;
+            --accent: #486a5a;
+            --accent-hover: #3d5e4f;
+            --accent-glow: rgba(72, 106, 90, 0.12);
+            --glass-border: rgba(30, 51, 42, 0.08);
+            --success: #486a5a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #f5f4f0;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+        }
+
+        .nav-item:hover {
+            color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .nav-item.active {
+            color: #ffffff;
+            background: var(--accent);
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.25);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            padding: 2.5rem 3.5rem;
+            max-width: 1400px;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-titles h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .header-titles p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #faf9f6;
+            border-color: #c8c6c0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .gate-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            padding: 1rem;
+            border-radius: 12px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .loader-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .spin {
+            animation: spin 1.5s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" title="Hub Nümtema">
+                <a href="http://127.0.0.1:8002" style="text-decoration: none; color: inherit;">
+                    <i data-lucide="home" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" title="Module C - People Also Ask">
+                    <i data-lucide="help-circle"></i>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="http://127.0.0.1:8000" target="_blank" class="nav-item" title="Ouvrir Pack Factory (Port 8000)" style="text-decoration: none;">
+                    <i data-lucide="package" style="color: var(--accent);"></i>
+                </a>
+                <div class="user-avatar" title="Nümtema Team">NT</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-titles">
+                    <h1>PEOPLE ALSO ASK</h1>
+                    <p>Module Vertical C — Cartographie de l'Intention Sémantique</p>
+                </div>
+            </header>
+
+            <!-- View: PAA -->
+            <div class="view-frame" style="display: block;">
+                <!-- Input Panel -->
+                <section class="card">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="search" style="color: var(--accent);"></i> Extraire les questions des internautes</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.5;">
+                        Saisissez un mot-clé ou sujet pour extraire et cartographier les questions connexes réellement posées sur Google.
+                    </p>
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                        <input type="text" id="paa-keyword" placeholder="Exemple : debuter le violon, gerer un conflit d'equipe..." style="flex-grow: 1; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem 1rem; font-size: 1rem; outline: none; background: #faf9f6; font-family: inherit;" onkeypress="if(event.key==='Enter') runPAAMining()">
+                        <button class="btn" onclick="runPAAMining()"><i data-lucide="search"></i> Cartographier les Questions</button>
+                    </div>
+                </section>
+
+                <!-- PAA Loader -->
+                <div id="paa-loader" class="loader-container card" style="padding: 4rem 2rem; display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--accent);"></i></div>
+                    <h3 style="font-family: 'Outfit'; font-size: 1.25rem; color: var(--text-primary); margin-bottom: 0.5rem; text-align: center;">Extraction sémantique en cours...</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; font-style: italic; text-align: center; margin: 0; max-width: 400px; line-height: 1.5;">Extraction et structuration récursive de Google Autocomplete (16 modificateurs de requêtes)...</p>
+                </div>
+
+                <!-- Results Panel -->
+                <div id="paa-results" class="card" style="display: none; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                        <h3 id="paa-result-title" style="font-family: 'Outfit'; font-size: 1.25rem; margin: 0;"></h3>
+                        <div class="tabs" style="border: none; margin: 0; padding: 0;">
+                            <button class="tab-btn active" id="paa-tab-btn-map" onclick="switchPAATab('paa-tab-map')">Schéma Sémantique</button>
+                            <button class="tab-btn" id="paa-tab-btn-list" onclick="switchPAATab('paa-tab-list')">Liste des Questions</button>
+                        </div>
+                    </div>
+
+                    <!-- PAA Tab 1: Mermaid Mindmap -->
+                    <div id="paa-tab-map" class="tab-content active">
+                        <div style="background: #faf9f6; padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: center; overflow-x: auto; margin-bottom: 1.5rem;">
+                            <div id="paa-mermaid-render" style="width: 100%; text-align: center;"></div>
+                        </div>
+                    </div>
+
+                    <!-- PAA Tab 2: Question List with Actions -->
+                    <div id="paa-tab-list" class="tab-content">
+                        <div style="display: grid; grid-template-columns: 1fr; gap: 1rem;" id="paa-questions-list-container">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JS -->
+    <script>
+        async function runPAAMining() {
+            const keyword = document.getElementById('paa-keyword').value.trim();
+            if (!keyword) {
+                alert("Veuillez saisir un mot-clé ou sujet.");
+                return;
+            }
+            
+            document.getElementById('paa-results').style.display = 'none';
+            document.getElementById('paa-loader').style.display = 'flex';
+            
+            try {
+                const response = await fetch(`/api/paa?q=${encodeURIComponent(keyword)}`);
+                if (!response.ok) throw new Error("Erreur de récupération");
+                const data = await response.json();
+                
+                renderPAAResults(keyword, data.questions || []);
+                document.getElementById('paa-results').style.display = 'flex';
+            } catch (err) {
+                alert("Erreur lors de l'extraction PAA : " + err.message);
+            } finally {
+                document.getElementById('paa-loader').style.display = 'none';
+            }
+        }
+
+        function renderPAAResults(keyword, questions) {
+            document.getElementById('paa-result-title').innerText = `Résultats pour "${keyword}" : ${questions.length} questions extraites`;
+            
+            // Render Mermaid Graph
+            const diagramDiv = document.getElementById('paa-mermaid-render');
+            diagramDiv.innerHTML = "";
+            
+            if (questions.length === 0) {
+                diagramDiv.innerHTML = "<p style='color: var(--text-secondary); padding: 2rem;'>Aucune question trouvée pour ce sujet.</p>";
+            } else {
+                let mCode = "graph TD\n";
+                mCode += `    root["${keyword.replace(/"/g, "'")}"]\n`;
+                mCode += "    classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;\n";
+                mCode += "    classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;\n";
+                mCode += "    class root root;\n";
+                
+                questions.forEach((q, idx) => {
+                    const safeQ = q.replace(/"/g, "'");
+                    mCode += `    q_${idx}["${safeQ}"]\n`;
+                    mCode += `    root --> q_${idx}\n`;
+                });
+                
+                const uniqueId = 'mermaid-paa-' + Date.now();
+                mermaid.render(uniqueId, mCode).then(result => {
+                    diagramDiv.innerHTML = result.svg;
+                }).catch(err => {
+                    console.error("Error rendering PAA diagram:", err);
+                    diagramDiv.innerHTML = `<pre>${mCode}</pre>`;
+                });
+            }
+            
+            // Render List with Actions
+            const container = document.getElementById('paa-questions-list-container');
+            container.innerHTML = "";
+            
+            if (questions.length === 0) {
+                container.innerHTML = "<p style='color: var(--text-secondary); text-align: center; padding: 2rem;'>Aucune question trouvée.</p>";
+            } else {
+                questions.forEach((q, idx) => {
+                    const row = document.createElement('div');
+                    row.className = 'gate-item';
+                    
+                    row.innerHTML = `
+                        <div style="font-weight: 500; color: var(--text-primary); padding-right: 1.5rem; text-align: left;">
+                            ${q}
+                        </div>
+                        <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                            <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem; height: auto; border: 1px solid var(--glass-border); background: none;" title="Copier la question">
+                                <i data-lucide="copy" style="width: 14px; height: 14px; color: var(--text-secondary);"></i>
+                            </button>
+                            <button class="btn" onclick="openPackFactoryWithQuery('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; height: auto; gap: 0.3rem;">
+                                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Créer Procédure (Port 8000)
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function openPackFactoryWithQuery(question) {
+            // Open Pack Factory (Port 8000) in new tab with question parameter q
+            const targetUrl = `http://127.0.0.1:8000/?q=${encodeURIComponent(question)}`;
+            window.open(targetUrl, '_blank');
+        }
+
+        function switchPAATab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            
+            if (tabId === 'paa-tab-map') {
+                document.getElementById('paa-tab-btn-map').classList.add('active');
+            } else {
+                document.getElementById('paa-tab-btn-list').classList.add('active');
+            }
+        }
+
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nümtema Pack Factory - Ingénierie des Procédures</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Mermaid.js for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    </script>
+    
+    <!-- Marked.js for Markdown Rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-primary: #edebe7;
+            --bg-card: #ffffff;
+            --text-primary: #1e332a;
+            --text-secondary: #5a7065;
+            --accent: #486a5a;
+            --accent-hover: #3d5e4f;
+            --accent-glow: rgba(72, 106, 90, 0.12);
+            --glass-border: rgba(30, 51, 42, 0.08);
+            --danger: #d9534f;
+            --warning: #f0ad4e;
+            --success: #486a5a;
+            --success-bg: #e2f2e9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #f5f4f0;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            width: 44px;
+            height: 44px;
+            background: #ffffff;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .nav-item.active {
+            color: #ffffff;
+            background: var(--accent);
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.25);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            padding: 2.5rem 3.5rem;
+            max-width: 1400px;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-titles h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .header-titles p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .header-search-bar {
+            position: relative;
+            width: 320px;
+        }
+
+        .header-search-bar input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 0.6rem 1rem 0.6rem 2.5rem;
+            font-size: 0.85rem;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .header-search-bar input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .header-search-bar i {
+            position: absolute;
+            left: 0.85rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            color: var(--text-secondary);
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+        }
+
+        textarea {
+            width: 100%;
+            background: #faf9f6;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.25rem;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+            background: #ffffff;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #faf9f6;
+            border-color: #c8c6c0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            padding: 0.5rem 1rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .view-frame {
+            display: none;
+        }
+
+        .view-frame.active {
+            display: block;
+        }
+
+        .question-card {
+            background: #faf9f6;
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .question-label {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .badge-blocking {
+            background: rgba(217, 83, 79, 0.1);
+            color: var(--danger);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .clarify-input {
+            width: 100%;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .clarify-input:focus {
+            border-color: var(--accent);
+        }
+
+        pre code {
+            background: #faf9f6;
+            display: block;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            overflow-x: auto;
+            color: var(--text-primary);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95rem;
+        }
+
+        .markdown-body {
+            font-family: inherit;
+        }
+
+        .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-primary);
+        }
+
+        .markdown-body ul {
+            margin-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .gate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .gate-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .loader-container {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" title="Hub Nümtema">
+                <a href="http://127.0.0.1:8002" style="text-decoration: none; color: inherit;">
+                    <i data-lucide="home" style="width: 24px; height: 24px; color: var(--accent);"></i>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <button id="nav-create" class="nav-item active" onclick="switchView('creation')" title="Pack Factory (Module B)">
+                    <i data-lucide="package"></i>
+                </button>
+                <button id="nav-history" class="nav-item" onclick="switchView('history')" title="Bibliothèque & Historique">
+                    <i data-lucide="library"></i>
+                </button>
+                <button id="nav-settings" class="nav-item" onclick="switchView('settings')" title="Configuration LLM">
+                    <i data-lucide="settings"></i>
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="http://127.0.0.1:8001" target="_blank" class="nav-item" title="Ouvrir People Also Ask (Port 8001)" style="text-decoration: none;">
+                    <i data-lucide="help-circle" style="color: var(--accent);"></i>
+                </a>
+                <div class="user-avatar" title="Nümtema Team">NT</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-titles">
+                    <h1 id="page-title">PACK FACTORY</h1>
+                    <p id="page-subtitle">Module Vertical B — Créateur de Procédures Opérationnelles</p>
+                </div>
+                <div class="header-search-bar" id="header-search-wrapper" style="display: none;">
+                    <i data-lucide="search"></i>
+                    <input type="text" id="top-search" placeholder="Rechercher un pack..." oninput="syncAndSearch(this.value)">
+                </div>
+            </header>
+
+            <!-- View: Creation -->
+            <div id="view-creation" class="view-frame active">
+                <!-- Initial Input -->
+                <section id="input-section" class="card">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="file-text" style="color: var(--accent);"></i> Décrivez le processus à modéliser</h2>
+                    <textarea id="raw-demand" rows="5" placeholder="Exemple : Quand une commande arrive, le stock manager vérifie la disponibilité. Si le produit est en stock, il prépare l'envoi. Si le stock est insuffisant, il propose une alternative..."></textarea>
+                    <div style="margin-top: 1.5rem; display: flex; justify-content: flex-end;">
+                        <button id="btn-submit-init" class="btn" onclick="submitDemand()"><i data-lucide="play-circle"></i> Analyser et Lancer la mission</button>
+                    </div>
+                </section>
+
+                <!-- Loader -->
+                <div id="loader-section" class="loader-container card" style="padding: 3rem 2rem; display: none;">
+                    <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;"><i data-lucide="loader-2" class="spin" style="width: 48px; height: 48px; color: var(--accent);"></i></div>
+                    <h3 id="loader-title" style="font-family: 'Outfit'; font-size: 1.25rem; color: var(--text-primary); margin-bottom: 1.5rem; text-align: center;">Traitement en cours...</h3>
+                    <div id="loader-steps" style="width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 0.8rem; margin: 0 auto 1.5rem auto;"></div>
+                    <p id="loader-text" style="color: var(--text-secondary); font-size: 0.85rem; font-style: italic; text-align: center; margin: 0;">Initialisation...</p>
+                </div>
+
+                <!-- Clarification Interview -->
+                <section id="clarification-section" class="card" style="display: none;">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; color: var(--warning); display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="alert-circle"></i> Clarification requise</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                        Le moteur a besoin de précisions sur les points suivants pour générer une procédure structurée sans angles morts.
+                    </p>
+                    <div id="questions-container"></div>
+                    <div style="margin-top: 2rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                        <button id="btn-autofill" class="btn btn-secondary" onclick="autofillWithAI()" style="border-color: var(--accent); color: var(--text-primary); background: rgba(72, 106, 90, 0.08); gap: 0.5rem;"><i data-lucide="wand-2"></i> Auto-remplir avec l'IA</button>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary" onclick="forceGenerate()"><i data-lucide="arrow-right-circle"></i> Passer outre</button>
+                            <button class="btn" onclick="submitAnswers()"><i data-lucide="check-circle"></i> Valider les réponses</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Main Results Grid -->
+                <div id="results-grid" class="layout-grid" style="display: none; margin-top: 2rem;">
+                    <!-- Left Panel: Artifacts tabs -->
+                    <div class="card" style="grid-column: 1 / -1; display: flex; flex-direction: column;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+                            <h3 id="pack-title-display" style="font-family: 'Outfit'; font-size: 1.5rem; margin: 0; display: flex; align-items: center; gap: 0.5rem;">
+                                <i data-lucide="check-circle" style="color: var(--success);"></i> Pack de Procédure Généré
+                            </h3>
+                            <div style="display: flex; gap: 0.75rem;">
+                                <button class="btn btn-secondary" onclick="exportZip()" style="gap: 0.4rem; font-size: 0.85rem;"><i data-lucide="archive"></i> Exporter en ZIP</button>
+                                <button class="btn btn-secondary" onclick="resetToHome()" style="gap: 0.4rem; font-size: 0.85rem;"><i data-lucide="rotate-ccw"></i> Nouveau Pack</button>
+                            </div>
+                        </div>
+
+                        <div class="tabs">
+                            <button class="tab-btn active" onclick="switchTab('tab-procedure')">Procédure Markdown</button>
+                            <button class="tab-btn" onclick="switchTab('tab-checklist')">Checklist Terrain</button>
+                            <button class="tab-btn" onclick="switchTab('tab-diagram')">Logigramme Mermaid</button>
+                            <button class="tab-btn" onclick="switchTab('tab-quality')">Audit Qualité & Gates</button>
+                        </div>
+
+                        <!-- Tab Content: Procedure -->
+                        <div id="tab-procedure" class="tab-content active">
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                                <button class="btn btn-secondary" onclick="downloadFile('procedure')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i data-lucide="download"></i> Télécharger .md</button>
+                            </div>
+                            <div id="procedure-content" class="markdown-body"></div>
+                        </div>
+
+                        <!-- Tab Content: Checklist -->
+                        <div id="tab-checklist" class="tab-content">
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem;">
+                                <button class="btn btn-secondary" onclick="downloadFile('checklist')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i data-lucide="download"></i> Télécharger .md</button>
+                            </div>
+                            <div id="checklist-content" class="markdown-body"></div>
+                        </div>
+
+                        <!-- Tab Content: Diagram -->
+                        <div id="tab-diagram" class="tab-content">
+                            <div style="display: flex; justify-content: flex-end; margin-bottom: 0.5rem; gap: 0.5rem;">
+                                <button class="btn btn-secondary" onclick="downloadFile('diagram')" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;"><i data-lucide="download"></i> Télécharger .mermaid</button>
+                            </div>
+                            <div style="background: #faf9f6; padding: 2rem; border-radius: 12px; border: 1px solid var(--glass-border); display: flex; justify-content: center; overflow-x: auto;">
+                                <div id="mermaid-render" class="mermaid"></div>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content: Quality & Audit -->
+                        <div id="tab-quality" class="tab-content">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+                                <div style="background: #faf9f6; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Score de Complétude</div>
+                                    <div id="score-completeness" style="font-size: 1.75rem; font-weight: 700; color: var(--accent);">--</div>
+                                </div>
+                                <div style="background: #faf9f6; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Score de Déterminisme</div>
+                                    <div id="score-determinism" style="font-size: 1.75rem; font-weight: 700; color: var(--accent);">--</div>
+                                </div>
+                                <div style="background: #faf9f6; padding: 1.25rem; border-radius: 12px; border: 1px solid var(--glass-border);">
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Gates Opérationnelles</div>
+                                    <div id="score-gates-count" style="font-size: 1.75rem; font-weight: 700; color: var(--accent);">--</div>
+                                </div>
+                            </div>
+
+                            <h4 style="margin-bottom: 1rem;">Qualité des Gates opérationnelles</h4>
+                            <div class="gate-list" id="verification-gates-container"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- View: History -->
+            <div id="view-history" class="view-frame">
+                <section id="history-section" class="card" style="padding: 2.25rem;">
+                    <h2 style="margin-bottom: 1.5rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="library" style="color: var(--accent);"></i> Bibliothèque des Packs</h2>
+                    <div id="history-container" style="display: grid; grid-template-columns: 1fr; gap: 1rem; max-height: 500px; overflow-y: auto; padding-right: 0.5rem;">
+                        <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Chargement de l'historique...</p>
+                    </div>
+                </section>
+            </div>
+
+            <!-- View: Settings -->
+            <div id="view-settings" class="view-frame">
+                <section class="card" style="padding: 2.25rem;">
+                    <h2 style="font-family: 'Outfit'; font-size: 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;"><i data-lucide="settings" style="color: var(--accent);"></i> Configurations LLM & Modèles</h2>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+                        <div>
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Fournisseur d'IA</label>
+                            <select id="llm-provider" onchange="onProviderChange()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none; font-family: inherit; font-size: 1rem;">
+                                <option value="gemini">Google Gemini (Défaut Cloud)</option>
+                                <option value="ollama" selected>Ollama (Local / Offline)</option>
+                                <option value="deepseek">DeepSeek (Cloud API)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Modèle d'IA</label>
+                            <div id="model-select-wrapper">
+                                <input type="text" id="llm-model" placeholder="ex: gemini-1.5-flash ou llama3" oninput="saveSettings()">
+                            </div>
+                        </div>
+                        <div id="api-key-container" style="display: none;">
+                            <label style="font-size: 0.85rem; color: var(--text-secondary); display: block; margin-bottom: 0.4rem;">Clé API personnalisée (optionnelle)</label>
+                            <input type="text" id="llm-api-key" placeholder="Saisir la clé API..." oninput="saveSettings()">
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- JS -->
+    <script>
+        let currentSessionId = "";
+        let currentData = null;
+        let currentSteps = [];
+        let ollamaModels = [];
+
+        async function fetchOllamaModels() {
+            try {
+                const r = await fetch('/api/ollama/models');
+                const data = await r.json();
+                if (data.models && data.models.length > 0) {
+                    ollamaModels = data.models;
+                }
+            } catch (e) {
+                console.error("Failed to fetch Ollama models:", e);
+            }
+        }
+
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+
+            const buttons = document.querySelectorAll('.tab-btn');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function getLLMSettings() {
+            const provider = document.getElementById('llm-provider').value;
+            const model = document.getElementById('llm-model').value;
+            const apiKey = document.getElementById('llm-api-key').value;
+            return { provider, model, api_key: apiKey };
+        }
+
+        async function submitDemand() {
+            const demand = document.getElementById('raw-demand').value.trim();
+            if (!demand) {
+                alert("Veuillez saisir une description de processus.");
+                return;
+            }
+
+            showLoader("Analyse initiale du processus par l'IA...");
+            const settings = getLLMSettings();
+
+            try {
+                const response = await fetch('/api/procedure/init', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        raw_demand: demand,
+                        ...settings
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de l'initialisation du processus.");
+                }
+
+                const data = await response.json();
+                currentSessionId = data.session_id;
+                currentData = data;
+
+                hideLoader();
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur : " + err.message);
+                hideLoader();
+            }
+        }
+
+        function handleFlowResult(data) {
+            if (data.status === 'waiting_clarification') {
+                renderClarificationInterview(data.missing_info);
+                document.getElementById('input-section').style.display = 'none';
+                document.getElementById('clarification-section').style.display = 'block';
+                document.getElementById('results-grid').style.display = 'none';
+            } else if (data.status === 'completed') {
+                document.getElementById('input-section').style.display = 'none';
+                document.getElementById('clarification-section').style.display = 'none';
+                document.getElementById('results-grid').style.display = 'grid';
+                renderArtifacts(data);
+            }
+            fetchHistory();
+        }
+
+        function renderClarificationInterview(questions) {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = "";
+
+            questions.forEach((q, idx) => {
+                const block = document.createElement('div');
+                block.className = "question-card";
+                block.innerHTML = `
+                    <div class="question-label">
+                        <span>Q${idx + 1}. ${q.question}</span>
+                        ${q.blocking ? '<span class="badge-blocking">Bloquant</span>' : ''}
+                    </div>
+                    <input type="text" class="clarify-input" data-question="${q.question}" placeholder="Votre réponse...">
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        async function autofillWithAI() {
+            const btn = document.getElementById('btn-autofill');
+            const originalText = btn.innerText;
+            btn.innerText = "⏳ Recherche des suggestions...";
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/suggest-answers`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Impossible de récupérer les suggestions.");
+                }
+
+                const data = await response.json();
+                const suggestions = data.suggestions || {};
+
+                const inputs = document.querySelectorAll('.clarify-input');
+                const cleanKey = str => str ? str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '').trim() : '';
+                
+                const suggestionMap = {};
+                Object.keys(suggestions).forEach(key => {
+                    suggestionMap[cleanKey(key)] = suggestions[key];
+                });
+
+                inputs.forEach(input => {
+                    const qText = input.dataset.question;
+                    const cleanQ = cleanKey(qText);
+                    
+                    let val = suggestions[qText] || suggestionMap[cleanQ];
+                    if (val) {
+                        input.value = val;
+                        input.style.borderColor = 'var(--success)';
+                        setTimeout(() => {
+                            input.style.borderColor = 'var(--glass-border)';
+                        }, 2000);
+                    }
+                });
+            } catch (err) {
+                alert("Erreur lors de la suggestion : " + err.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        async function submitAnswers() {
+            const inputs = document.querySelectorAll('.clarify-input');
+            const answers = {};
+            inputs.forEach(input => {
+                answers[input.dataset.question] = input.value.trim();
+            });
+
+            showLoader("Intégration des précisions et génération du pack...");
+
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/answer`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ answers })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la soumission des réponses.");
+                }
+
+                const data = await response.json();
+                currentData = data;
+
+                hideLoader();
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur : " + err.message);
+                hideLoader();
+            }
+        }
+
+        async function forceGenerate() {
+            showLoader("Génération directe de la procédure sans clarifications...");
+
+            try {
+                const response = await fetch(`/api/procedure/${currentSessionId}/force-generate`, {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    throw new Error("Erreur lors de la génération forcée.");
+                }
+
+                const data = await response.json();
+                currentData = data;
+
+                hideLoader();
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur : " + err.message);
+                hideLoader();
+            }
+        }
+
+        function renderArtifacts(data) {
+            const artifacts = data.artifacts || {};
+
+            if (data.brief && data.brief.title) {
+                document.getElementById('pack-title-display').innerHTML = `<i data-lucide="check-circle" style="color: var(--success);"></i> Pack : ${data.brief.title}`;
+            }
+
+            if (artifacts.procedure) {
+                document.getElementById('procedure-content').innerHTML = marked.parse(artifacts.procedure);
+            }
+            if (artifacts.checklist) {
+                document.getElementById('checklist-content').innerHTML = marked.parse(artifacts.checklist);
+            }
+
+            if (artifacts.diagram) {
+                const diagramDiv = document.getElementById('mermaid-render');
+                diagramDiv.innerHTML = "";
+                const uniqueId = 'mermaid-svg-' + Date.now();
+                mermaid.render(uniqueId, artifacts.diagram).then(result => {
+                    diagramDiv.innerHTML = result.svg;
+                }).catch(err => {
+                    console.error("Error rendering mermaid diagram:", err);
+                    diagramDiv.innerHTML = `<pre>${artifacts.diagram}</pre>`;
+                });
+            }
+
+            if (data.verification_result) {
+                const verif = data.verification_result;
+                document.getElementById('score-completeness').innerText = verif.completeness_score ? (verif.completeness_score * 100).toFixed(0) + "%" : "--";
+                document.getElementById('score-determinism').innerText = verif.determinism_score ? (verif.determinism_score * 100).toFixed(0) + "%" : "--";
+                
+                const gates = verif.quality_gates || [];
+                document.getElementById('score-gates-count').innerText = gates.length;
+
+                const gatesContainer = document.getElementById('verification-gates-container');
+                gatesContainer.innerHTML = "";
+
+                gates.forEach(g => {
+                    const item = document.createElement('div');
+                    item.className = "gate-item";
+                    item.innerHTML = `
+                        <div>
+                            <div style="font-weight: 600;">${g.name || 'Gate'}</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);">${g.details || ''}</div>
+                        </div>
+                        <span style="background: ${g.passed ? 'var(--success-bg)' : 'rgba(217,83,79,0.1)'}; color: ${g.passed ? 'var(--success)' : 'var(--danger)'}; font-size: 0.75rem; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700;">
+                            ${g.passed ? 'VALIDE' : 'ÉCHEC'}
+                        </span>
+                    `;
+                    gatesContainer.appendChild(item);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        function downloadFile(type) {
+            if (!currentSessionId) return;
+            let ext = ".md";
+            if (type === 'diagram') ext = ".mermaid";
+            
+            let filename = `${currentSessionId}_procedure.md`;
+            if (type === 'checklist') filename = `${currentSessionId}_checklist.md`;
+            if (type === 'diagram') filename = `${currentSessionId}_diagram.mermaid`;
+
+            window.location.href = `/api/procedure/artifact/${currentSessionId}/${filename}`;
+        }
+
+        function exportZip() {
+            if (!currentSessionId) return;
+            window.location.href = `/api/procedure/export-zip/${currentSessionId}`;
+        }
+
+        function showLoader(titleText) {
+            document.getElementById('input-section').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('results-grid').style.display = 'none';
+            
+            const loader = document.getElementById('loader-section');
+            document.getElementById('loader-title').innerText = titleText || "Traitement en cours...";
+            
+            const stepsContainer = document.getElementById('loader-steps');
+            stepsContainer.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: var(--text-primary);">
+                    <i data-lucide="check-circle-2" style="color: var(--accent); width: 18px; height: 18px;"></i>
+                    <span>Extraction des informations du processus</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; font-size: 0.9rem; color: var(--text-secondary);">
+                    <i data-lucide="loader-2" class="spin" style="width: 18px; height: 18px; color: var(--accent);"></i>
+                    <span>Analyse des angles morts & questions</span>
+                </div>
+            `;
+            
+            loader.style.display = 'flex';
+            lucide.createIcons();
+        }
+
+        function hideLoader() {
+            document.getElementById('loader-section').style.display = 'none';
+        }
+
+        async function fetchHistory(searchQuery = "") {
+            try {
+                const response = await fetch('/api/history');
+                const historyData = await response.json();
+                
+                const container = document.getElementById('history-container');
+                container.innerHTML = "";
+
+                if (!historyData || historyData.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Aucun pack dans la bibliothèque.</p>`;
+                    return;
+                }
+
+                const filtered = historyData.filter(item => {
+                    if (!searchQuery) return true;
+                    const q = searchQuery.toLowerCase();
+                    return (item.title && item.title.toLowerCase().includes(q)) ||
+                           (item.raw_demand && item.raw_demand.toLowerCase().includes(q)) ||
+                           (item.purpose && item.purpose.toLowerCase().includes(q));
+                });
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<p style="color: var(--text-secondary); text-align: center; padding: 1rem;">Aucun résultat pour "${searchQuery}".</p>`;
+                    return;
+                }
+
+                filtered.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'gate-item';
+                    row.style.padding = '1rem 1.25rem';
+                    
+                    const isCompleted = item.status === 'completed';
+                    const badgeBg = isCompleted ? 'var(--success-bg)' : 'rgba(240, 173, 78, 0.1)';
+                    const badgeColor = isCompleted ? 'var(--success)' : 'var(--warning)';
+                    const badgeText = isCompleted ? 'TERMINÉ' : 'EN ATTENTE';
+
+                    row.innerHTML = `
+                        <div style="flex: 1; padding-right: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-weight: 600;">
+                                <span>${item.title || 'Pack de Procédure'}</span>
+                                <span style="background: ${badgeBg}; color: ${badgeColor}; font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight: 700;">${badgeText}</span>
+                            </div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 0.25rem;">
+                                ${item.purpose || item.raw_demand}
+                            </div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                                Modèle : ${item.provider} (${item.model || 'défaut'}) • ${new Date(item.created_at).toLocaleString()}
+                            </div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="loadSession('${item.session_id}')" style="padding: 0.4rem 0.8rem; font-size: 0.8rem; height: auto; gap: 0.3rem;"><i data-lucide="external-link" style="width: 12px; height: 12px;"></i> Charger</button>
+                    `;
+                    container.appendChild(row);
+                });
+                lucide.createIcons();
+            } catch (err) {
+                console.error("Error fetching history:", err);
+            }
+        }
+
+        async function loadSession(sessionId) {
+            switchView('creation');
+            showLoader("Chargement du pack depuis la base de données...");
+            try {
+                const response = await fetch(`/api/history/${sessionId}`);
+                const data = await response.json();
+                
+                document.getElementById('input-section').style.display = 'none';
+                handleFlowResult(data);
+            } catch (err) {
+                alert("Erreur lors du chargement du pack.");
+                hideLoader();
+            }
+        }
+
+        function resetToHome() {
+            switchView('creation');
+            document.getElementById('input-section').style.display = 'block';
+            document.getElementById('results-grid').style.display = 'none';
+            document.getElementById('clarification-section').style.display = 'none';
+            document.getElementById('raw-demand').value = "";
+            fetchHistory();
+        }
+
+        function switchView(viewId) {
+            const views = document.querySelectorAll('.view-frame');
+            views.forEach(v => v.classList.remove('active'));
+
+            const activeView = document.getElementById(`view-${viewId}`);
+            if (activeView) activeView.classList.add('active');
+
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            const navBtnId = (viewId === 'creation') ? 'nav-create' : `nav-${viewId}`;
+            const activeBtn = document.getElementById(navBtnId);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const searchWrapper = document.getElementById('header-search-wrapper');
+            if (searchWrapper) {
+                searchWrapper.style.display = (viewId === 'history') ? 'block' : 'none';
+            }
+            lucide.createIcons();
+        }
+
+        function syncAndSearch(val) {
+            fetchHistory(val);
+        }
+
+        function saveSettings() {
+            const provider = document.getElementById('llm-provider').value;
+            const model = document.getElementById('llm-model').value;
+            const apiKey = document.getElementById('llm-api-key').value;
+            
+            localStorage.setItem('llm_provider', provider);
+            localStorage.setItem('llm_model', model);
+            localStorage.setItem('llm_api_key', apiKey);
+        }
+
+        function loadSettings() {
+            const provider = localStorage.getItem('llm_provider') || 'ollama';
+            const model = localStorage.getItem('llm_model') || 'gpt-oss:20b-cloud';
+            const apiKey = localStorage.getItem('llm_api_key') || '';
+
+            document.getElementById('llm-provider').value = provider;
+            onProviderChange(model);
+            
+            const modelEl = document.getElementById('llm-model');
+            if (modelEl) modelEl.value = model;
+            
+            const apiEl = document.getElementById('llm-api-key');
+            if (apiEl) apiEl.value = apiKey;
+        }
+
+        function onProviderChange(selectedModel = null) {
+            const provider = document.getElementById('llm-provider').value;
+            const selectWrapper = document.getElementById('model-select-wrapper');
+            const keyContainer = document.getElementById('api-key-container');
+            
+            if (!ollamaModels.includes("gpt-oss:20b-cloud")) {
+                ollamaModels.unshift("gpt-oss:20b-cloud");
+            }
+            if (!ollamaModels.includes("gpt-oss:120b-cloud")) {
+                ollamaModels.unshift("gpt-oss:120b-cloud");
+            }
+
+            const activeModel = selectedModel || localStorage.getItem('llm_model') || 'gpt-oss:20b-cloud';
+
+            if (provider === 'gemini') {
+                const gemModel = selectedModel || 'gemini-1.5-flash';
+                selectWrapper.innerHTML = `<input type="text" id="llm-model" value="${gemModel}" placeholder="ex: gemini-1.5-flash" oninput="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none;">`;
+                keyContainer.style.display = 'none';
+            } else if (provider === 'ollama') {
+                let selectHtml = `<select id="llm-model" onchange="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none; font-family: inherit; font-size: 1rem;">`;
+                ollamaModels.forEach(m => {
+                    const isSel = (m === activeModel) ? 'selected' : '';
+                    selectHtml += `<option value="${m}" ${isSel}>${m}</option>`;
+                });
+                selectHtml += `</select>`;
+                selectWrapper.innerHTML = selectHtml;
+                keyContainer.style.display = 'none';
+            } else if (provider === 'deepseek') {
+                const dsModel = selectedModel || 'deepseek-chat';
+                selectWrapper.innerHTML = `<input type="text" id="llm-model" value="${dsModel}" placeholder="ex: deepseek-chat" oninput="saveSettings()" style="width: 100%; background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 12px; padding: 0.75rem; color: var(--text-primary); outline: none;">`;
+                keyContainer.style.display = 'block';
+            }
+            
+            localStorage.setItem('llm_provider', provider);
+            localStorage.setItem('llm_model', activeModel);
+            lucide.createIcons();
+        }
+
+        window.addEventListener('load', async () => {
+            await fetchOllamaModels();
+            loadSettings();
+            fetchHistory();
+            switchView('creation');
+            
+            // Check for query parameter q (from PAA cross-linking)
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryDemand = urlParams.get('q');
+            if (queryDemand) {
+                document.getElementById('raw-demand').value = queryDemand;
+                // Auto trigger initial submit if query parameter is present
+                setTimeout(submitDemand, 300);
+            }
+            lucide.createIcons();
+        });
+    </script>
+</body>
+</html>

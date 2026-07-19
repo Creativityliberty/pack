@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nümtema Agentic Hub - Portail Commun</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Plus+Jakarta+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Mermaid.js for Diagrams -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ startOnLoad: false, theme: 'neutral' });
+    </script>
+
+    <style>
+        :root {
+            --bg-primary: #edebe7;
+            --bg-card: #ffffff;
+            --text-primary: #1e332a;
+            --text-secondary: #5a7065;
+            --accent: #486a5a;
+            --accent-hover: #3d5e4f;
+            --accent-glow: rgba(72, 106, 90, 0.12);
+            --glass-border: rgba(30, 51, 42, 0.08);
+            --success: #486a5a;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-layout {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 80px;
+            background: #f5f4f0;
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+            gap: 2rem;
+            position: fixed;
+            height: 100vh;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.25);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            width: 100%;
+            align-items: center;
+        }
+
+        .nav-item {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            background: transparent;
+            border: none;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            color: var(--accent);
+            background: var(--bg-card);
+        }
+
+        .nav-item.active {
+            color: #ffffff;
+            background: var(--accent);
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.25);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: var(--accent);
+        }
+
+        .main-content {
+            margin-left: 80px;
+            flex: 1;
+            padding: 2.5rem 3.5rem;
+            max-width: 1400px;
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .header-titles h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+        }
+
+        .header-titles p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .layout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .btn {
+            background: var(--accent);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 0.85rem 1.75rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 12px rgba(72, 106, 90, 0.2);
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #ffffff;
+            color: var(--text-primary);
+            border: 1px solid var(--glass-border);
+            box-shadow: none;
+        }
+
+        .btn-secondary:hover {
+            background: #faf9f6;
+            border-color: #c8c6c0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-logo" title="Hub Nümtema">
+                <i data-lucide="home" style="width: 24px; height: 24px; color: #ffffff;"></i>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="http://127.0.0.1:8000" class="nav-item" title="Pack Factory (Port 8000)" target="_blank">
+                    <i data-lucide="package"></i>
+                </a>
+                <a href="http://127.0.0.1:8001" class="nav-item" title="People Also Ask (Port 8001)" target="_blank">
+                    <i data-lucide="help-circle"></i>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-avatar" title="Nümtema Team">NT</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="main-header">
+                <div class="header-titles">
+                    <h1>NÜMTEMA AGENTIC HUB</h1>
+                    <p>Portail d'Accueil Commun (Port 8002)</p>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <div class="card" style="padding: 3rem 2.5rem; text-align: center; margin-bottom: 2rem;">
+                <h2 style="font-family: 'Outfit'; font-size: 2.25rem; margin-bottom: 0.75rem; color: var(--accent);">Portail Décisionnel & Opérationnel</h2>
+                <p style="color: var(--text-secondary); max-width: 650px; margin: 0 auto 2.5rem auto; font-size: 1.05rem;">
+                    Bienvenue sur le Hub Nümtema. Deux microservices autonomes travaillent en synergie pour relier l'analyse de l'intention utilisateur à l’ingénierie des procédures terrain.
+                </p>
+                
+                <div class="layout-grid" style="text-align: left;">
+                    <!-- Module B Card -->
+                    <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.2);">
+                        <div>
+                            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(72, 106, 90, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                <i data-lucide="package" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Service 1 • Port 8000</span>
+                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">Pack Factory</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                                Générateur de procédures opérationnelles, checklists terrain et logigrammes Mermaid avec audit automatique de conformité des processus.
+                            </p>
+                        </div>
+                        <a href="http://127.0.0.1:8000" target="_blank" class="btn" style="width: 100%;">
+                            Ouvrir Pack Factory <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Module C Card -->
+                    <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.2);">
+                        <div>
+                            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(72, 106, 90, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                <i data-lucide="help-circle" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Service 2 • Port 8001</span>
+                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">People Also Ask</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                                Extracteur sémantique et cartographie de requêtes Google Autocomplete pour bâtir des cocons d'apprentissage et de formation.
+                            </p>
+                        </div>
+                        <a href="http://127.0.0.1:8001" target="_blank" class="btn btn-secondary" style="width: 100%; border-color: var(--accent); color: var(--accent);">
+                            Lancer People Also Ask <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Synergy Flowchart Card -->
+            <div class="card" style="padding: 2.25rem;">
+                <h3 style="font-family: 'Outfit'; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem; font-size: 1.25rem;"><i data-lucide="git-branch" style="color: var(--accent);"></i> Architecture & Liaisons Microservices</h3>
+                <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                    Les deux services tournent sur des ports indépendants et communiquent par routage dynamique de paramètres d'URL :
+                </p>
+                <div style="background: #faf9f6; border: 1px solid var(--glass-border); border-radius: 16px; padding: 2rem; display: flex; justify-content: center; overflow-x: auto;">
+                    <div class="mermaid" id="synergy-mermaid-diagram" style="width: 100%; text-align: center;">
+                        graph LR
+                            PAA["People Also Ask (Port 8001)"] -->|Cllic 'Créer Procédure'| Link["URL Parameter: ?q=Question"]
+                            Link -->|Redirection automatique| PACK["Pack Factory (Port 8000)"]
+                            PACK -->|PocketFlow LLM Engine| OUT["Procédure & Checklist terrain"]
+                            classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;
+                            classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;
+                            class PAA,PACK default;
+                            class Link,OUT root;
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JS -->
+    <script>
+        window.addEventListener('load', () => {
+            lucide.createIcons();
+            
+            // Render Mermaid Synergy Diagram
+            const synEl = document.getElementById('synergy-mermaid-diagram');
+            if (synEl) {
+                const code = `graph LR
+                    PAA["People Also Ask (Port 8001)"] -->|Clic 'Créer Procédure'| Link["URL Parameter: ?q=Question"]
+                    Link -->|Redirection automatique| PACK["Pack Factory (Port 8000)"]
+                    PACK -->|PocketFlow LLM Engine| OUT["Procédure & Checklist terrain"]
+                    classDef default fill:#ffffff,stroke:#c8c6c0,stroke-width:1px,color:#1e332a,font-family:Inter;
+                    classDef root fill:#486a5a,stroke:#3d5e4f,color:#ffffff,font-family:Outfit;
+                    class PAA,PACK default;
+                    class Link,OUT root;`;
+                const uniqueId = 'mermaid-synergy-' + Date.now();
+                mermaid.render(uniqueId, code).then(result => {
+                    synEl.innerHTML = result.svg;
+                }).catch(err => console.error("Error rendering synergy diagram:", err));
+            }
+        });
+    </script>
+</body>
+</html>
