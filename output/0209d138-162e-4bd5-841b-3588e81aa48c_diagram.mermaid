@@ -1,0 +1,8 @@
+flowchart TD
+    start(["Déclaration d'un incident matériel par le client sur le portail de support."]) --> step_001
+    step_001{"Vérifier la garantie dans le CRM?"}
+    step_001 -->|valide| step_002
+    step_001 -->|invalide| step_003
+    step_002{"Effectuer le diagnostic technique?"}
+    step_002 -->|panne_materielle| step_004
+    step_002 -->|resolu_logiciel| step_005

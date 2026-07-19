@@ -954,10 +954,24 @@
 
                 // Map suggestions to the form inputs
                 const inputs = document.querySelectorAll('.clarify-input');
+                
+                // Helper to clean keys for fuzzy matching
+                const cleanKey = str => str ? str.toLowerCase().replace(/[^a-zA-Z0-9]/g, '').trim() : '';
+                
+                // Create a clean key map of suggestions
+                const suggestionMap = {};
+                Object.keys(suggestions).forEach(key => {
+                    suggestionMap[cleanKey(key)] = suggestions[key];
+                });
+
                 inputs.forEach(input => {
                     const qText = input.dataset.question;
-                    if (suggestions[qText]) {
-                        input.value = suggestions[qText];
+                    const cleanQ = cleanKey(qText);
+                    
+                    // Match directly or using clean key
+                    let val = suggestions[qText] || suggestionMap[cleanQ];
+                    if (val) {
+                        input.value = val;
                         // Highlight input visually to show it was populated
                         input.style.borderColor = 'var(--success)';
                         setTimeout(() => {

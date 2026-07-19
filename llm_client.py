@@ -21,6 +21,26 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
         elif system_instruction and any(k in system_instruction.lower() for k in ["sav", "remplacement", "panne", "matériel", "rma"]):
             is_sav = True
 
+        # Extract dynamic topic keyword for custom processes in mock mode
+        topic = "processus"
+        search_text = (prompt or "") + " " + (system_instruction or "")
+        search_text = search_text.lower()
+        import re
+        words = re.findall(r'[a-zA-Zéèàùçâêîôûëïü\-]+', search_text)
+        stop_words = {
+            "comment", "pourquoi", "quand", "chaque", "gestion", "processus", "etape", "etapes",
+            "valider", "verifier", "concepteur", "expert", "analyste", "propose", "reponses", "logiques", "questions",
+            "clarification", "brute", "demande", "standard", "pratiques", "operationnelles", "uniquement", "valide",
+            "business", "analyste", "fusionne", "expert", "brief", "clarifie", "conception", "generer", "proceder",
+            "procedure", "checklist", "logigramme", "mermaid", "conflit", "recrutement", "livraison", "expedition",
+            "commande", "commandes", "client", "clients", "conge", "conges", "absences", "vacances", "panne", "pannes",
+            "materiel", "remplacement", "retour", "garantie", "soumission", "enregistre", "disponibilite", "produits"
+        }
+        for w in words:
+            if len(w) > 4 and w not in stop_words:
+                topic = w
+                break
+
         if system_instruction and "concepteur de processus" in system_instruction.lower():
             if is_leave:
                 return json.dumps({
@@ -100,41 +120,41 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                     ]
                 }, ensure_ascii=False)
             else:
+                # Dynamic Custom Process pack
                 return json.dumps({
-                    "id": "order_processing",
-                    "title": "Traitement des Commandes Clients",
+                    "id": f"{topic}_process",
+                    "title": f"Gestion de : {topic.capitalize()}",
                     "version": "1.0.0",
                     "status": "draft",
-                    "purpose": "Transformer la réception d'une commande client en expédition vérifiée.",
-                    "trigger": {"description": "Arrivée d'une commande client sur le canal e-commerce."},
-                    "scope": {"included": ["Vérification stock", "Préparation colis"], "excluded": ["Livraison"]},
-                    "actors": ["stock_manager", "admin"],
-                    "tools": ["système d'inventaire"],
+                    "purpose": f"Assurer la bonne exécution et le contrôle qualité de : {topic}.",
+                    "trigger": {"description": f"Déclenchement d'un événement ou demande concernant {topic}."},
+                    "scope": {"included": [f"Vérification initiale de {topic}", f"Exécution des étapes de {topic}"], "excluded": ["Audit externe tiers"]},
+                    "actors": ["gestionnaire_dossier", "superviseur"],
+                    "tools": ["système d'information interne"],
                     "steps": [
                         {
                             "id": "step_001",
-                            "title": "Réceptionner la commande",
-                            "actor": "admin",
-                            "instructions": ["Ouvrir l'administration e-commerce.", "Télécharger le bon de commande."],
-                            "output": "commande_enregistree",
+                            "title": f"Initier le dossier de {topic}",
+                            "actor": "gestionnaire_dossier",
+                            "instructions": [f"Ouvrir la fiche de {topic}.", f"Vérifier les données de la demande de {topic}."],
+                            "output": f"{topic}_initialise",
                             "transitions": "step_002"
                         },
                         {
                             "id": "step_002",
-                            "title": "Vérifier la disponibilité",
-                            "actor": "stock_manager",
-                            "instructions": ["Comparer le stock réel avec la quantité commandée."],
-                            "output": "disponibilite_produits",
+                            "title": f"Valider la conformité de {topic}",
+                            "actor": "superviseur",
+                            "instructions": [f"Vérifier les critères opérationnels de {topic}."],
+                            "output": f"{topic}_valide",
                             "transitions": {
-                                "available": "step_003",
-                                "partial": "step_004",
-                                "unavailable": "step_005"
+                                "conforme": "step_003",
+                                "refuse": "step_004"
                             }
                         }
                     ],
-                    "checklist": ["Commande validée", "Stock disponible", "Colis étiqueté"],
+                    "checklist": [f"Fiche de {topic} créée", f"Conformité {topic} validée", "Notification finale transmise"],
                     "risks": [
-                        {"description": "Rupture de stock non détectée", "control": "Vérification systématique avant validation"}
+                        {"description": f"Erreur de saisie dans {topic}", "control": "Vérification automatisée des champs obligatoires."}
                     ]
                 }, ensure_ascii=False)
         elif system_instruction and "analyste de processus" in system_instruction.lower():
@@ -157,9 +177,9 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
             else:
                 return json.dumps({
                     "questions": [
-                        {"question": "Par quel canal la commande arrive-t-elle ?", "category": "trigger", "blocking": True},
-                        {"question": "Qui vérifie la commande ?", "category": "actor", "blocking": True},
-                        {"question": "Que faire si le stock est insuffisant ?", "category": "exception", "blocking": True}
+                        {"question": f"Par quel canal ou outil le processus de {topic} commence-t-il ?", "category": "trigger", "blocking": True},
+                        {"question": f"Qui est l'acteur ou responsable chargé d'exécuter la tâche de {topic} ?", "category": "actor", "blocking": True},
+                        {"question": f"Quelle action corrective mener en cas d'erreur ou d'exception de {topic} ?", "category": "exception", "blocking": True}
                     ]
                 }, ensure_ascii=False)
         elif system_instruction and "propose des réponses logiques" in system_instruction.lower():
@@ -177,9 +197,9 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                 }, ensure_ascii=False)
             else:
                 return json.dumps({
-                    "Par quel canal la commande arrive-t-elle ?": "Via l'e-mail du service client ou l'interface d'administration.",
-                    "Qui vérifie la commande ?": "Le conseiller support client (support_agent).",
-                    "Que faire si le stock est insuffisant ?": "Mettre la commande en attente et envoyer un e-mail automatique d'explication au client."
+                    f"Par quel canal ou outil le processus de {topic} commence-t-il ?": f"Via le portail interne ou un formulaire dédié pour {topic}.",
+                    f"Qui est l'acteur ou responsable chargé d'exécuter la tâche de {topic} ?": f"Le superviseur opérationnel en charge de {topic}.",
+                    f"Quelle action corrective mener en cas d'erreur ou d'exception de {topic} ?": f"Mettre en attente et envoyer une notification au gestionnaire de {topic}."
                 }, ensure_ascii=False)
         elif system_instruction and "business analyst expert" in system_instruction.lower():
             if is_leave:
@@ -210,16 +230,16 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                 }, ensure_ascii=False)
             else:
                 return json.dumps({
-                    "title": "Traitement des Commandes Clients",
-                    "purpose": "Expédier les commandes rapidement.",
-                    "trigger": "Arrivée d'une commande.",
-                    "expected_result": "Commande préparée et expédiée.",
-                    "scope": {"included": ["Vérification stock", "Préparation"], "excluded": ["Livraison"]},
-                    "actors": ["admin", "stock_manager"],
-                    "tools": ["système d'inventaire"],
-                    "known_steps": ["Réceptionner la commande", "Vérifier la disponibilité"],
-                    "decisions": ["Le produit est-il en stock ?"],
-                    "exceptions": ["Stock insuffisant"]
+                    "title": f"Gestion de : {topic.capitalize()}",
+                    "purpose": f"Gérer efficacement la tâche de {topic}.",
+                    "trigger": f"Détection du besoin de {topic}.",
+                    "expected_result": f"Processus de {topic} clôturé et validé.",
+                    "scope": {"included": [f"Vérification de {topic}", f"Enregistrement de {topic}"], "excluded": ["Intervention technique externe"]},
+                    "actors": ["gestionnaire", "superviseur"],
+                    "tools": ["système d'information"],
+                    "known_steps": [f"Initier {topic}", f"Vérifier conformité {topic}"],
+                    "decisions": [f"{topic.capitalize()} est-il valide ?"],
+                    "exceptions": [f"Rejet ou non-conformité de {topic}"]
                 }, ensure_ascii=False)
         elif system_instruction and "fusionne le brief" in system_instruction.lower():
             if is_leave:
@@ -250,16 +270,16 @@ def call_llm(prompt: str, system_instruction: str = None, response_mime_type: st
                 }, ensure_ascii=False)
             else:
                 return json.dumps({
-                    "title": "Traitement des Commandes Clients (Clarifié)",
-                    "purpose": "Expédier les commandes rapidement.",
-                    "trigger": "Arrivée d'une commande via Shopify.",
-                    "expected_result": "Commande préparée et expédiée.",
-                    "scope": {"included": ["Vérification stock", "Préparation"], "excluded": ["Livraison"]},
-                    "actors": ["admin", "stock_manager"],
-                    "tools": ["système d'inventaire", "Shopify"],
-                    "known_steps": ["Réceptionner la commande", "Vérifier la disponibilité"],
-                    "decisions": ["Le produit est-il en stock ?"],
-                    "exceptions": ["Stock insuffisant"]
+                    "title": f"Gestion de : {topic.capitalize()} (Clarifié)",
+                    "purpose": f"Gérer efficacement la tâche de {topic}.",
+                    "trigger": f"Détection du besoin de {topic} (processus validé).",
+                    "expected_result": f"Processus de {topic} clôturé et validé.",
+                    "scope": {"included": [f"Vérification de {topic}", f"Enregistrement de {topic}"], "excluded": ["Intervention technique externe"]},
+                    "actors": ["gestionnaire", "superviseur"],
+                    "tools": ["système d'information"],
+                    "known_steps": [f"Initier {topic}", f"Vérifier conformité {topic}"],
+                    "decisions": [f"{topic.capitalize()} est-il valide ?"],
+                    "exceptions": [f"Rejet ou non-conformité de {topic}"]
                 }, ensure_ascii=False)
         else:
             return json.dumps({"status": "ok"}, ensure_ascii=False)

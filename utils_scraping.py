@@ -31,13 +31,17 @@ def get_people_also_ask_mined(query: str) -> list:
     in standard Python scripts without browser rendering (Playwright/Selenium), we use Google Autocomplete
     Search Suggestion Mining.
     
-    It queries the open autocomplete API recursively with question modifiers ("comment", "pourquoi", "quel", 
-    "qui", "combien", "est-ce que") to collect real queries asked by users.
+    It queries the open autocomplete API recursively with a wide variety of question modifiers
+    to collect real queries asked by users.
     """
     if not query.strip():
         return []
         
-    modifiers = ["comment", "pourquoi", "quel", "qui", "combien", "est-ce que"]
+    modifiers = [
+        "comment", "pourquoi", "quel", "quelle", "quels", "quelles", 
+        "qui", "combien", "est-ce que", "où", "quand", "comment faire pour",
+        "avis sur", "tuto", "prix", "meilleur"
+    ]
     mined_questions = []
     
     # Simple search clean up
@@ -53,17 +57,21 @@ def get_people_also_ask_mined(query: str) -> list:
         for sugg in suggestions:
             # Clean and standardise suggestion
             sugg_clean = sugg.strip()
-            if sugg_clean and sugg_clean not in mined_questions:
+            # Avoid duplicate variations
+            sugg_lower = sugg_clean.lower()
+            if sugg_clean and not any(x.lower() == sugg_lower for x in mined_questions):
                 # Add question mark if it starts with a question word and lacks it
-                if any(sugg_clean.lower().startswith(x) for x in modifiers) and not sugg_clean.endswith('?'):
+                if any(sugg_clean.lower().startswith(x) for x in ["comment", "pourquoi", "quel", "quelle", "qui", "combien", "est-ce que", "où", "quand"]) and not sugg_clean.endswith('?'):
                     sugg_clean += ' ?'
                 mined_questions.append(sugg_clean)
                 
     # Also query the original query itself to grab standard autocompletes
     original_suggestions = get_google_suggestions(query)
     for sugg in original_suggestions:
-        if sugg not in mined_questions:
-            mined_questions.append(sugg)
+        sugg_clean = sugg.strip()
+        sugg_lower = sugg_clean.lower()
+        if sugg_clean and not any(x.lower() == sugg_lower for x in mined_questions):
+            mined_questions.append(sugg_clean)
             
     return mined_questions
 
