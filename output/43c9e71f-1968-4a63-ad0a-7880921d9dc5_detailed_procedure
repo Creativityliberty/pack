@@ -1,0 +1,38 @@
+# Procédure : Gestion du SAV & Remplacement Matériel
+**Version** : 1.0.0 | **Statut** : draft
+
+## 1. Objectif
+Traiter et valider les pannes matérielles pour l'envoi de remplacements sous garantie.
+
+## 2. Déclencheur
+* **Déclenchement** : Déclaration d'un incident matériel par le client sur le portail de support.
+
+## 3. Rôles et Outils
+* **Acteurs** : agent_support_n1, technicien_n2, operateur_entrepot, client
+* **Outils** : CRM Support, Portail Expéditions, Système Inventaire
+
+## 4. Étapes Détaillées
+
+### step_001 - Vérifier la garantie dans le CRM
+* **Acteur responsable** : `agent_support_n1`
+* **Instructions** :
+  - Ouvrir la fiche de génère.
+  - Vérifier les données de la demande de génère.
+  - Précision utilisateur appliquée : Gestion de : Analyse
+  - Précision utilisateur appliquée : Gérer efficacement la tâche de analyse.
+  - Précision utilisateur appliquée : Détection du besoin de analyse.
+  - Précision utilisateur appliquée : Processus de analyse clôturé et validé.
+* **Entrées** : 
+* **Sortie** : `statut_garantie`
+
+### step_002 - Effectuer le diagnostic technique
+* **Acteur responsable** : `technicien_n2`
+* **Instructions** :
+  - Prendre contact avec le client.
+  - Exécuter les scripts de test à distance.
+* **Entrées** : 
+* **Sortie** : `verdict_diagnostic`
+
+## 5. Matrice des Risques et Contrôles
+* **Risque** : Expédition sans réception du retour défectueux
+  - **Contrôle associé** : Bloquer l'envoi dans le système d'inventaire tant que le RMA n'est pas scanné.

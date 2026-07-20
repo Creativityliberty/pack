@@ -420,15 +420,19 @@
                     row.className = 'gate-item';
                     
                     row.innerHTML = `
-                        <div style="font-weight: 500; color: var(--text-primary); padding-right: 1.5rem; text-align: left;">
-                            ${q}
+                        <div style="flex: 1; text-align: left; padding-right: 1.5rem;">
+                            <div style="font-weight: 500; color: var(--text-primary);">${q}</div>
+                            <div id="ai-answer-${idx}" style="display: none; margin-top: 0.75rem; background: #faf9f6; padding: 1rem; border-radius: 10px; border: 1px solid var(--glass-border); font-size: 0.9rem; color: var(--text-primary);"></div>
                         </div>
-                        <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
+                        <div style="display: flex; gap: 0.5rem; flex-shrink: 0; align-items: flex-start;">
+                            <button class="btn btn-secondary" onclick="synthesizeAnswer('${q.replace(/'/g, "\\'")}', ${idx})" style="padding: 0.4rem 0.7rem; font-size: 0.82rem; height: auto; gap: 0.3rem;" title="Générer une réponse par l'IA">
+                                <i data-lucide="sparkles" style="width: 13px; height: 13px; color: var(--accent);"></i> Répondre IA
+                            </button>
                             <button class="btn btn-secondary" onclick="navigator.clipboard.writeText('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem; height: auto; border: 1px solid var(--glass-border); background: none;" title="Copier la question">
                                 <i data-lucide="copy" style="width: 14px; height: 14px; color: var(--text-secondary);"></i>
                             </button>
                             <button class="btn" onclick="openPackFactoryWithQuery('${q.replace(/'/g, "\\'")}')" style="padding: 0.4rem 0.8rem; font-size: 0.88rem; height: auto; gap: 0.3rem;">
-                                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Créer Procédure (Port 8000)
+                                <i data-lucide="external-link" style="width: 14px; height: 14px;"></i> Créer Procédure (8000)
                             </button>
                         </div>
                     `;
@@ -436,6 +440,26 @@
                 });
             }
             lucide.createIcons();
+        }
+
+        async function synthesizeAnswer(question, idx) {
+            const el = document.getElementById(`ai-answer-${idx}`);
+            el.style.display = 'block';
+            el.innerHTML = '<em>⏳ Rédaction de la réponse par le modèle LLM...</em>';
+
+            try {
+                const response = await fetch('/api/paa/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                if (!response.ok) throw new Error("Erreur de réponse LLM.");
+                const data = await response.json();
+                el.innerHTML = `<strong>💡 Synthèse IA :</strong><br>${data.answer.replace(/\n/g, '<br>')}`;
+            } catch (err) {
+                el.innerHTML = `<span style="color: var(--danger);">Erreur : ${err.message}</span>`;
+            }
         }
 
         function openPackFactoryWithQuery(question) {

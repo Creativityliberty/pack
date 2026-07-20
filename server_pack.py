@@ -11,7 +11,13 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Dict, Any, List, Optional
 
-app = FastAPI(title="Nümtema Pack Factory", description="Service d'ingénierie des procédures opérationnelles (Module B)")
+app = FastAPI(
+    title="Nümtema Pack Factory API", 
+    description="Service d'ingénierie des procédures opérationnelles, checklists et logigrammes (Module B)",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
+)
 
 # In-memory session store
 SESSIONS: Dict[str, Dict[str, Any]] = {}

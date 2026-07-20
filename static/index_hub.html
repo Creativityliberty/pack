@@ -255,39 +255,71 @@
                     Bienvenue sur le Hub Nümtema. Deux microservices autonomes travaillent en synergie pour relier l'analyse de l'intention utilisateur à l’ingénierie des procédures terrain.
                 </p>
                 
-                <div class="layout-grid" style="text-align: left;">
-                    <!-- Module B Card -->
+                <div class="layout-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); text-align: left; gap: 1.5rem;">
+                    <!-- Module A Card -->
                     <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.2);">
                         <div>
                             <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(72, 106, 90, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
-                                <i data-lucide="package" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                                <i data-lucide="key" style="color: var(--accent); width: 28px; height: 28px;"></i>
                             </div>
-                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Service 1 • Port 8000</span>
-                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">Pack Factory</h3>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Module A • Port 8003</span>
+                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">Keywords & Intentions</h3>
                             <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
-                                Générateur de procédures opérationnelles, checklists terrain et logigrammes Mermaid avec audit automatique de conformité des processus.
+                                Clustering sémantique et analyse d'intention de recherche (Informateur, Commercial, Transactionnel) par IA.
                             </p>
                         </div>
-                        <a href="http://127.0.0.1:8000" target="_blank" class="btn" style="width: 100%;">
-                            Ouvrir Pack Factory <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
-                        </a>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <a href="http://127.0.0.1:8003" target="_blank" class="btn" style="width: 100%;">
+                                Lancer Mots-Clés <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                            </a>
+                            <a href="http://127.0.0.1:8003/docs" target="_blank" class="btn btn-secondary" style="width: 100%; font-size: 0.8rem; padding: 0.4rem; justify-content: center;">
+                                <i data-lucide="file-code" style="width: 14px; height: 14px;"></i> Swagger API (/docs)
+                            </a>
+                        </div>
                     </div>
-                    
+
                     <!-- Module C Card -->
                     <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.2);">
                         <div>
                             <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(72, 106, 90, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
                                 <i data-lucide="help-circle" style="color: var(--accent); width: 28px; height: 28px;"></i>
                             </div>
-                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Service 2 • Port 8001</span>
-                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">People Also Ask</h3>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Module C • Port 8001</span>
+                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">People Also Ask + IA</h3>
                             <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
-                                Extracteur sémantique et cartographie de requêtes Google Autocomplete pour bâtir des cocons d'apprentissage et de formation.
+                                Extractions Google PAA avec synthèse rédigée par l'IA et redirection vers Pack Factory.
                             </p>
                         </div>
-                        <a href="http://127.0.0.1:8001" target="_blank" class="btn btn-secondary" style="width: 100%; border-color: var(--accent); color: var(--accent);">
-                            Lancer People Also Ask <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
-                        </a>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <a href="http://127.0.0.1:8001" target="_blank" class="btn btn-secondary" style="width: 100%; border-color: var(--accent); color: var(--accent);">
+                                Lancer PAA + IA <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                            </a>
+                            <a href="http://127.0.0.1:8001/docs" target="_blank" class="btn btn-secondary" style="width: 100%; font-size: 0.8rem; padding: 0.4rem; justify-content: center;">
+                                <i data-lucide="file-code" style="width: 14px; height: 14px;"></i> Swagger API (/docs)
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Module B Card -->
+                    <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between; border-color: rgba(72, 106, 90, 0.2);">
+                        <div>
+                            <div style="width: 52px; height: 52px; border-radius: 14px; background: rgba(72, 106, 90, 0.1); display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem;">
+                                <i data-lucide="package" style="color: var(--accent); width: 28px; height: 28px;"></i>
+                            </div>
+                            <span style="font-size: 0.75rem; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Module B • Port 8000</span>
+                            <h3 style="font-family: 'Outfit'; font-size: 1.4rem; margin: 0.25rem 0 0.75rem 0;">Pack Factory</h3>
+                            <p style="color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; line-height: 1.5;">
+                                Ingénierie des procédures opérationnelles, checklists terrain et logigrammes Mermaid avec audit LLM.
+                            </p>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                            <a href="http://127.0.0.1:8000" target="_blank" class="btn" style="width: 100%;">
+                                Ouvrir Pack Factory <i data-lucide="external-link" style="width: 16px; height: 16px;"></i>
+                            </a>
+                            <a href="http://127.0.0.1:8000/docs" target="_blank" class="btn btn-secondary" style="width: 100%; font-size: 0.8rem; padding: 0.4rem; justify-content: center;">
+                                <i data-lucide="file-code" style="width: 14px; height: 14px;"></i> Swagger API (/docs)
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
